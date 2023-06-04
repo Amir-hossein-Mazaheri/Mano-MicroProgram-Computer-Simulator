@@ -2,11 +2,11 @@ import type { BR, CD, F1, F2, F3 } from "../types";
 
 export class MicroProgramLine {
   private _name: string | null = null;
-  private _F1: F1 = "NOP";
-  private _F2: F2 = "NOP";
-  private _F3: F3 = "NOP";
-  private _CD: CD = "U";
-  private _BR: BR = "JMP";
+  private _F1: F1 = { code: "NOP", binary: "000" };
+  private _F2: F2 = { code: "NOP", binary: "000" };
+  private _F3: F3 = { code: "NOP", binary: "000" };
+  private _CD: CD = { code: "U", binary: "00" };
+  private _BR: BR = { code: "JMP", binary: "00" };
   private _ADDR = "0000000";
 
   set name(name: string | null) {
@@ -58,13 +58,21 @@ export class MicroProgramLine {
   }
 
   set ADDR(addr: string) {
-    if (addr.length !== 7)
-      throw new Error("You must set 7bit long address for MicroProgramLine.");
-
     this._ADDR = addr;
   }
 
   get ADDR() {
     return this._ADDR;
+  }
+
+  get binary() {
+    return (
+      this.F1.binary +
+      this.F2.binary +
+      this.F3.binary +
+      this.CD.binary +
+      this.BR.binary +
+      this.ADDR
+    );
   }
 }

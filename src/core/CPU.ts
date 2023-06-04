@@ -3,7 +3,6 @@ import { binOperation } from "../utils/binOperation";
 import { incBinary } from "../utils/incBinary";
 import { AssemblyLine } from "./AssemblyLine";
 import { Memory } from "./Memory";
-import { MicroProgramLine } from "./MicroProgramLine";
 import { MicroProgramMemory } from "./MicroProgramMemory";
 
 /**
@@ -20,9 +19,39 @@ export class CPU {
     "",
     "",
     false,
-    "0000000000000000"
+    "0000000000000000",
+    false,
+    true
   ); //16bit
   private _AC = "0000000000000000"; //16bit
+  private _lookUpTable = {
+    NOP: () => ({}),
+    ADD: this.ADD,
+    CLRAC: this.CLRAC,
+    INCAC: this.INCAC,
+    DRTAC: this.DRTAC,
+    DRTAR: this.DRTAR,
+    PCTAR: this.PCTAR,
+    WRITE: this.WRITE,
+    SUB: this.SUB,
+    OR: this.OR,
+    AND: this.AND,
+    READ: this.READ,
+    ACTDR: this.ACTDR,
+    INCDR: this.INCDR,
+    PCTDR: this.PCTDR,
+    XOR: this.XOR,
+    COM: this.COM,
+    SHL: this.SHL,
+    SHR: this.SHR,
+    INCPC: this.INCPC,
+    ARTPC: this.ARTPC,
+    CD: this.CD,
+    JMP: this.JMP,
+    CALL: this.CALL,
+    RET: this.RET,
+    MAP: this.MAP,
+  };
 
   private constructor(
     private _microProgramMemory: MicroProgramMemory,
@@ -45,31 +74,7 @@ export class CPU {
   }
 
   execute() {
-    const MAR = this._memory.read(this._PC);
-
-    while (MAR.instruction !== "HLT") {
-      const instruction = MAR.instruction;
-
-      let microProgramLine: MicroProgramLine | null = null;
-
-      this._AR = this._PC;
-
-      for (
-        let i = 0;
-        i < this._microProgramMemory.content.length && i < 64;
-        i++
-      ) {
-        if (this._microProgramMemory.content[i].name === instruction) {
-          microProgramLine = this._microProgramMemory.content[i];
-          break;
-        }
-      }
-
-      if (!microProgramLine)
-        throw new Error(`Invalid instruction ${instruction}.`);
-
-      this._PC = incBinary(this._PC);
-    }
+    //
   }
 
   // START F1
@@ -144,11 +149,21 @@ export class CPU {
   }
 
   private SHL() {
-    //
+    const ac = this._AC.split("");
+
+    ac.pop();
+    ac.push("0");
+
+    this._AC = ac.join("");
   }
 
   private SHR() {
-    //
+    const ac = this._AC.split("");
+
+    ac.shift();
+    ac.unshift("0");
+
+    this._AC = ac.join("");
   }
 
   private INCPC() {
@@ -157,5 +172,36 @@ export class CPU {
 
   private ARTPC() {
     this._PC = this._AR;
+  }
+
+  private CD(cd: string) {
+    if (cd === "00") {
+      return true;
+    } else if (cd === "01") {
+      return this._DR.indirect;
+    } else if (cd === "10") {
+      return this._AC[15] === "1";
+    } else if (cd === "11") {
+      return parseInt(this._AC, 2) === 0;
+    }
+
+    return false;
+  }
+
+  private JMP(i: number) {
+    this._microProgramMemory.CAR = this._microProgramMemory.content[i].ADDR;
+  }
+
+  private CALL(i: number) {
+    this._microProgramMemory.SBR = incBinary(this._microProgramMemory.CAR);
+    this._microProgramMemory.CAR = this._microProgramMemory.content[i].ADDR;
+  }
+
+  private RET() {
+    this._microProgramMemory.CAR = this._microProgramMemory.SBR;
+  }
+
+  private MAP() {
+    this._microProgramMemory.CAR = `0${this._DR.binary.slice(11, 15)}00`;
   }
 }

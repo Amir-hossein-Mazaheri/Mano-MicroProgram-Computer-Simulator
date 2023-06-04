@@ -1,12 +1,23 @@
 import { NO_LABEL } from "../types";
 import { AssemblyLine } from "./AssemblyLine";
+import { MicroProgramMemory } from "./MicroProgramMemory";
+
+export const ioRef = [
+  { code: "INP", binary: "1111100000000000" },
+  { code: "OUT", binary: "1111010000000000" },
+  { code: "SKI", binary: "1111001000000000" },
+  { code: "SKO", binary: "1111000100000000" },
+  { code: "ION", binary: "1111000010000000" },
+  { code: "IOF", binary: "1111000001000000" },
+  { code: "HLT", binary: "0111000000000001" },
+] as const;
 
 export class Assembler {
   private _code = "";
   private _assembledLines: Record<number, AssemblyLine> = {};
   private _warns: string[] = [];
 
-  constructor(code?: string) {
+  constructor(private _microProgramMemory: MicroProgramMemory, code?: string) {
     if (code) {
       this._code = code;
     }
@@ -54,6 +65,8 @@ export class Assembler {
     */
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+      let foundInstruction = false;
+      let lastInstruction = "";
 
       if (!line.trim()) {
         this._warns.push(`Line ${i + 1} is empty!`);
@@ -63,45 +76,110 @@ export class Assembler {
       const withoutComment = line.split("/");
       const withLabel = withoutComment[0].trim().split(",");
 
+      let hasLabel = false;
+
       if (withLabel[0] && withLabel.length > 1) {
-        if (withLabel[0].toUpperCase() !== withLabel[0]) {
-          this._warns.push(
-            `Label at line ${
-              i + 1
-            } should be replace with fully uppercase characters.`
-          );
-        }
+        hasLabel = true;
+      }
 
-        const [instruction, operand, indirect] = withLabel[1].trim().split(" ");
-
-        this._assembledLines[lineCounter] = new AssemblyLine(
-          withLabel[0],
-          lineCounter,
-          instruction,
-          operand,
-          !!indirect
-        );
-      } else {
-        const [instruction, operand, indirect] = withLabel[0].trim().split(" ");
-
-        if (instruction === "ORG") {
-          lineCounter = +operand;
-          continue;
-        }
-
-        if (instruction === "END") {
-          hasEnd = true;
-          break;
-        }
-
-        this._assembledLines[lineCounter] = new AssemblyLine(
-          NO_LABEL,
-          lineCounter,
-          instruction,
-          operand,
-          !!indirect
+      if (hasLabel && withLabel[0].toUpperCase() !== withLabel[0]) {
+        this._warns.push(
+          `Label at line ${
+            i + 1
+          } should be replace with fully uppercase characters.`
         );
       }
+
+      const [instruction, operand, indirect] = withLabel[hasLabel ? 1 : 0]
+        .trim()
+        .split(" ");
+
+      if (instruction === "ORG") {
+        lineCounter = +operand;
+        continue;
+      }
+
+      if (instruction === "END") {
+        hasEnd = true;
+        break;
+      }
+
+      let k = 0;
+      lastInstruction = instruction;
+
+      const io = ioRef.find((io) => io.code === instruction);
+
+      if (instruction === "HEX" || instruction === "DEC") {
+        foundInstruction = true;
+
+        let binaryNumber = parseInt(
+          operand,
+          instruction === "HEX" ? 16 : 10
+        ).toString(2);
+
+        if (binaryNumber.length < 16) {
+          binaryNumber = binaryNumber.padStart(16, "0");
+        }
+
+        if (binaryNumber.length > 16) {
+          binaryNumber = binaryNumber.slice(binaryNumber.length - 16);
+        }
+
+        this._assembledLines[lineCounter] = new AssemblyLine(
+          hasLabel ? withLabel[0] : NO_LABEL,
+          lineCounter,
+          instruction,
+          operand,
+          !!indirect,
+          binaryNumber,
+          false,
+          true
+        );
+      } else if (io) {
+        foundInstruction = true;
+
+        this._assembledLines[lineCounter] = new AssemblyLine(
+          hasLabel ? withLabel[0] : NO_LABEL,
+          lineCounter,
+          instruction,
+          operand,
+          !!indirect,
+          io.binary,
+          true
+        );
+      } else {
+        for (const key in this._microProgramMemory.content) {
+          const content = this._microProgramMemory.content[key];
+
+          if (content.name === instruction) {
+            foundInstruction = true;
+            let oppCode = k.toString(2);
+
+            if (oppCode.length < 4) {
+              oppCode = oppCode.padStart(4, "0");
+            }
+
+            this._assembledLines[lineCounter] = new AssemblyLine(
+              hasLabel ? withLabel[0] : NO_LABEL,
+              lineCounter,
+              instruction,
+              operand,
+              !!indirect,
+              oppCode,
+              false
+            );
+
+            break;
+          }
+
+          if (content.name) k++;
+        }
+      }
+
+      if (!foundInstruction)
+        throw new Error(
+          `Couldn't find the "${lastInstruction}" at line ${i + 1}.`
+        );
 
       lineCounter++;
     }

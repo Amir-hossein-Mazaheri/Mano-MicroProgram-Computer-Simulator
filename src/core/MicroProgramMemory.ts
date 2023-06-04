@@ -1,5 +1,4 @@
 import { BR, CD, F1, F2, F3 } from "../types";
-import { incBinary } from "../utils/incBinary";
 import { MicroProgramLine } from "./MicroProgramLine";
 
 /**
@@ -10,10 +9,14 @@ export class MicroProgramMemory {
   private _SBR = "0000000";
   private _CAR = "0000000";
   private _instructions = "";
-  private _content: MicroProgramLine[] = [];
+  private _content: Record<number, MicroProgramLine> = {};
 
   private constructor(instructions?: string) {
-    if (instructions) this._instructions = instructions;
+    if (instructions) this.instructions = instructions;
+
+    for (let i = 0; i < 128; i++) {
+      this._content[i] = new MicroProgramLine();
+    }
   }
 
   static create(instructions?: string) {
@@ -29,7 +32,7 @@ export class MicroProgramMemory {
   }
 
   set instructions(instructions: string) {
-    this._instructions = instructions;
+    this._instructions = instructions + "\n";
   }
 
   get SBR() {
@@ -56,12 +59,35 @@ export class MicroProgramMemory {
     return this._content;
   }
 
+  getName(oppCode: string) {
+    let k = 0;
+
+    for (const key in this._content) {
+      const content = this._content[key];
+
+      if (content.name === oppCode) {
+        let oppCode = k.toString(2);
+
+        if (oppCode.length < 4) {
+          oppCode = oppCode.padStart(4, "0");
+        }
+
+        return oppCode;
+      }
+
+      if (content.name) k++;
+    }
+  }
+
   load() {
-    this._content = [];
     const lines = this._instructions.split("\n");
+    let fetchAddr = "";
+    let lc = 0;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+
+      if (!line.trim()) continue;
 
       const microCodes = line.split(" ").filter((l) => !!l.trim());
 
@@ -73,10 +99,10 @@ export class MicroProgramMemory {
         if (orgOperand < 0)
           throw new Error(`"ORG" operand cannot be negative number.`);
 
-        if (orgOperand < 64)
-          throw new Error(`"ORG" operand must be greater that "64"`);
+        if (orgOperand > 64)
+          throw new Error(`"ORG" operand must be smaller that "64"`);
 
-        this._CAR = orgOperand.toString(2);
+        lc = orgOperand;
 
         continue;
       }
@@ -88,21 +114,19 @@ export class MicroProgramMemory {
       if (withName.length > 1) {
         pl.name = withName[0];
         microCodes.shift();
+
+        if (withName[0] === "FETCH")
+          fetchAddr = lc.toString(2).padStart(7, "0");
       }
 
-      for (const microCode of microCodes) {
-        if (microCode === "NEXT") {
-          pl.ADDR = this._CAR;
-          this._CAR = incBinary(this._CAR);
+      for (let i = 0; i < microCodes.length - 1; i++) {
+        const microCode = microCodes[i];
 
-          continue;
-        }
-
-        const f1 = F1.find((f1) => f1 === microCode);
-        const f2 = F2.find((f2) => f2 === microCode);
-        const f3 = F3.find((f3) => f3 === microCode);
-        const cd = CD.find((cd) => cd === microCode);
-        const br = BR.find((br) => br === microCode);
+        const f1 = F1.find((f1) => f1.code === microCode);
+        const f2 = F2.find((f2) => f2.code === microCode);
+        const f3 = F3.find((f3) => f3.code === microCode);
+        const cd = CD.find((cd) => cd.code === microCode);
+        const br = BR.find((br) => br.code === microCode);
 
         const gathered = [
           { F1: f1 },
@@ -112,10 +136,23 @@ export class MicroProgramMemory {
           { BR: br },
         ].filter((m) => !!Object.values(m)[0]);
 
-        if (gathered.length !== 1) {
+        if (gathered.length !== 1 && gathered.length !== 3) {
           throw new Error(
             `Invalid MicroProgram instructions at line ${i + 1} fix it.`
           );
+        }
+
+        if (gathered.length === 3) {
+          if (
+            gathered[0].F1?.code !== "NOP" ||
+            gathered[1].F2?.code !== "NOP" ||
+            gathered[2].F3?.code !== "NOP"
+          )
+            throw new Error(
+              `Invalid MicroProgram instructions for "NOP" at line ${
+                i + 1
+              } fix it.`
+            );
         }
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -123,7 +160,32 @@ export class MicroProgramMemory {
         pl[Object.keys(gathered[0])[0]] = Object.values(gathered[0])[0];
       }
 
-      this._content.push(pl);
+      const lastElement = microCodes[microCodes.length - 1];
+
+      if (lastElement === "NEXT") {
+        pl.ADDR = (lc + 1).toString(2).padStart(7, "0");
+      } else if (!BR.find((br) => br.code === lastElement)) {
+        pl.ADDR = lastElement;
+      }
+
+      this._content[lc] = pl;
+
+      lc++;
     }
+
+    this._CAR = fetchAddr;
+
+    for (const key in this._content) {
+      if (isNaN(parseInt(this._content[key].ADDR, 2))) {
+        for (const newKey in this._content) {
+          if (this._content[newKey].name === this._content[key].ADDR) {
+            this._content[key].ADDR = (+newKey).toString(2).padStart(7, "0");
+            break;
+          }
+        }
+      }
+    }
+
+    console.log("microprogram loaded content: ", this._content);
   }
 }

@@ -11,7 +11,9 @@ export class Memory {
 
   private constructor(assembledLines: Record<number, AssemblyLine>) {
     for (let i = 0; i < 2048; i++) {
-      this._content.push(new AssemblyLine(NO_LABEL, -1, "", "", false));
+      this._content.push(
+        new AssemblyLine(NO_LABEL, -1, "", "", false, "0000000000000000", false)
+      );
     }
 
     this._fillContent(assembledLines);

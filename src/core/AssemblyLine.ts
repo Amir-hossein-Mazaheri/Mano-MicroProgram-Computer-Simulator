@@ -1,4 +1,6 @@
 import { NO_LABEL } from "../types";
+import { ioRef } from "./Assembler";
+import { MicroProgramMemory } from "./MicroProgramMemory";
 
 export class AssemblyLine {
   constructor(
@@ -7,7 +9,9 @@ export class AssemblyLine {
     private _instruction: string,
     private _operand: string,
     private _indirect: boolean,
-    private _binary: string = "0000000000000000"
+    private _oppCode: string,
+    private _ioRef: boolean,
+    private _isNumber = false
   ) {}
 
   get label() {
@@ -42,11 +46,47 @@ export class AssemblyLine {
     this._indirect = indirect;
   }
 
+  get oppCode() {
+    return this._oppCode;
+  }
+
+  get ioRef() {
+    return this._ioRef;
+  }
+
+  get isNumber() {
+    return this._isNumber;
+  }
+
   get binary() {
-    return this._binary;
+    if (this._oppCode.length > 4) return this._oppCode;
+
+    return (
+      (this._indirect ? "1" : "0") +
+      this._oppCode +
+      (+this._operand).toString(2)
+    );
   }
 
   set binary(binary: string) {
-    this._binary = binary;
+    if (binary.length > 4) {
+      this._operand = binary;
+      this._isNumber = true;
+    }
+
+    this._indirect = binary[0] === "1";
+    this._oppCode = binary.slice(1, 5);
+    this._operand = parseInt(binary.slice(5), 2).toString();
+    let instruction = MicroProgramMemory.create().getName(this._oppCode);
+
+    if (!instruction) {
+      instruction = ioRef.find((io) => io.binary === binary)?.code;
+    }
+
+    if (!instruction) {
+      throw new Error("Invalid binary set for assembly line.");
+    }
+
+    this._instruction = instruction;
   }
 }
