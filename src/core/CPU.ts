@@ -1,4 +1,4 @@
-import { NO_LABEL } from "../types";
+import { CD, NO_LABEL } from "../types";
 import { binOperation } from "../utils/binOperation";
 import { incBinary } from "../utils/incBinary";
 import { AssemblyLine } from "./AssemblyLine";
@@ -24,41 +24,13 @@ export class CPU {
     true
   ); //16bit
   private _AC = "0000000000000000"; //16bit
-  private _lookUpTable = {
-    NOP: () => ({}),
-    ADD: this.ADD,
-    CLRAC: this.CLRAC,
-    INCAC: this.INCAC,
-    DRTAC: this.DRTAC,
-    DRTAR: this.DRTAR,
-    PCTAR: this.PCTAR,
-    WRITE: this.WRITE,
-    SUB: this.SUB,
-    OR: this.OR,
-    AND: this.AND,
-    READ: this.READ,
-    ACTDR: this.ACTDR,
-    INCDR: this.INCDR,
-    PCTDR: this.PCTDR,
-    XOR: this.XOR,
-    COM: this.COM,
-    SHL: this.SHL,
-    SHR: this.SHR,
-    INCPC: this.INCPC,
-    ARTPC: this.ARTPC,
-    CD: this.CD,
-    JMP: this.JMP,
-    CALL: this.CALL,
-    RET: this.RET,
-    MAP: this.MAP,
-  };
 
   private constructor(
     private _microProgramMemory: MicroProgramMemory,
     private _memory: Memory,
     pc?: string
   ) {
-    this._PC = pc ?? _memory.start.toString(2);
+    this._PC = pc ?? _memory.start.toString(2).padStart(11, "0");
   }
 
   static create(
@@ -74,14 +46,36 @@ export class CPU {
   }
 
   execute() {
-    //
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      if (this._DR.instruction === "HLT") {
+        break;
+      }
+
+      const car = this._microProgramMemory.CAR;
+      const content = this._microProgramMemory.read(car);
+
+      this[content.F1.code]();
+      this[content.F2.code]();
+      this[content.F3.code]();
+
+      if (this.CD(content.CD)) {
+        this[content.BR.code](car);
+      } else {
+        this._microProgramMemory.CAR = incBinary(this._microProgramMemory.CAR);
+      }
+    }
+  }
+
+  private NOP() {
+    console.log("Im doing nothing...");
   }
 
   // START F1
   private ADD() {
-    this._AC = (parseInt(this._AC, 2) + parseInt(this._DR.binary, 2)).toString(
-      2
-    );
+    this._AC = (parseInt(this._AC, 2) + parseInt(this._DR.binary, 2))
+      .toString(2)
+      .padStart(16, "0");
   }
 
   private CLRAC() {
@@ -132,11 +126,13 @@ export class CPU {
   }
 
   private INCDR() {
-    this._DR.binary = incBinary(this._DR.binary);
+    if (this._DR.isNumber) {
+      this._DR.oppCode = incBinary(this._DR.oppCode);
+    }
   }
 
   private PCTDR() {
-    //
+    this._DR.binary = `${this._DR.binary.slice(11)}${this._PC}`;
   }
 
   // START F3
@@ -174,27 +170,28 @@ export class CPU {
     this._PC = this._AR;
   }
 
-  private CD(cd: string) {
-    if (cd === "00") {
-      return true;
-    } else if (cd === "01") {
-      return this._DR.indirect;
-    } else if (cd === "10") {
-      return this._AC[15] === "1";
-    } else if (cd === "11") {
-      return parseInt(this._AC, 2) === 0;
+  private CD(cd: CD) {
+    switch (cd.code) {
+      case "U":
+        return true;
+      case "I":
+        return this._DR.indirect;
+      case "S":
+        return this._AC[0] === "1";
+      case "Z":
+        return parseInt(this._AC, 2) === 0;
+      default:
+        return false;
     }
-
-    return false;
   }
 
-  private JMP(i: number) {
-    this._microProgramMemory.CAR = this._microProgramMemory.content[i].ADDR;
+  private JMP(car: string) {
+    this._microProgramMemory.CAR = this._microProgramMemory.read(car).ADDR;
   }
 
-  private CALL(i: number) {
+  private CALL(car: string) {
     this._microProgramMemory.SBR = incBinary(this._microProgramMemory.CAR);
-    this._microProgramMemory.CAR = this._microProgramMemory.content[i].ADDR;
+    this._microProgramMemory.CAR = this._microProgramMemory.read(car).ADDR;
   }
 
   private RET() {
@@ -202,6 +199,7 @@ export class CPU {
   }
 
   private MAP() {
-    this._microProgramMemory.CAR = `0${this._DR.binary.slice(11, 15)}00`;
+    this._AR = this._DR.operand;
+    this._microProgramMemory.CAR = `0${this._DR.oppCode}00`;
   }
 }
