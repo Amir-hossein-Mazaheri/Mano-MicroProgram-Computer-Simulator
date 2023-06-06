@@ -1,4 +1,5 @@
 import { NO_LABEL } from "../types";
+import { toBin } from "../utils/toBin";
 import { AssemblyLine } from "./AssemblyLine";
 import { MicroProgramMemory } from "./MicroProgramMemory";
 
@@ -112,18 +113,10 @@ export class Assembler {
       if (instruction === "HEX" || instruction === "DEC") {
         foundInstruction = true;
 
-        let binaryNumber = parseInt(
-          operand,
-          instruction === "HEX" ? 16 : 10
-        ).toString(2);
-
-        if (binaryNumber.length < 16) {
-          binaryNumber = binaryNumber.padStart(16, "0");
-        }
-
-        if (binaryNumber.length > 16) {
-          binaryNumber = binaryNumber.slice(binaryNumber.length - 16);
-        }
+        const binaryNumber = toBin(
+          instruction === "HEX" ? operand : +operand,
+          16
+        );
 
         this._assembledLines[lineCounter] = new AssemblyLine(
           hasLabel ? withLabel[0] : NO_LABEL,
@@ -200,8 +193,9 @@ export class Assembler {
       if (operand && isNaN(Number(operand)) && !this._isHex(operand)) {
         for (const newKey in this._assembledLines) {
           if (this._assembledLines[newKey].label === operand) {
-            this._assembledLines[key].operand =
-              this._assembledLines[newKey].ln.toString();
+            this._assembledLines[key].operand = (+newKey)
+              .toString(2)
+              .padStart(12, "0");
             break;
           }
         }
