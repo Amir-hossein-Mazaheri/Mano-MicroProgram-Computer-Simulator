@@ -46,6 +46,10 @@ export class AssemblyLine {
     this._indirect = indirect;
   }
 
+  set oppCode(oppCode: string) {
+    this._oppCode = oppCode;
+  }
+
   get oppCode() {
     return this._oppCode;
   }
@@ -69,10 +73,7 @@ export class AssemblyLine {
   }
 
   set binary(binary: string) {
-    if (binary.length > 4) {
-      this._operand = binary;
-      this._isNumber = true;
-    }
+    binary = binary.split("").reverse().join("");
 
     this._indirect = binary[0] === "1";
     this._oppCode = binary.slice(1, 5);
