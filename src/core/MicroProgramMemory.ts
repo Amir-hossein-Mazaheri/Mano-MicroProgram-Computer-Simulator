@@ -32,7 +32,9 @@ export class MicroProgramMemory {
   }
 
   set instructions(instructions: string) {
-    this._instructions = instructions + "\n";
+    this._instructions =
+      instructions +
+      "\nORG 64\nFETCH: PCTAR U JMP NEXT\nREAD INCPC U JMP NEXT\nDRTAR U MAP\nINDRCT: READ U JMP NEXT\nDRTAR U RET";
   }
 
   get SBR() {
@@ -87,6 +89,7 @@ export class MicroProgramMemory {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
+      // skip empty lines
       if (!line.trim()) continue;
 
       const microCodes = line.split(" ").filter((l) => !!l.trim());
@@ -118,6 +121,8 @@ export class MicroProgramMemory {
         if (withName[0] === "FETCH")
           fetchAddr = lc.toString(2).padStart(7, "0");
       }
+
+      console.log("microcodes: ", microCodes);
 
       for (let i = 0; i < microCodes.length - 1; i++) {
         const microCode = microCodes[i];
@@ -161,10 +166,15 @@ export class MicroProgramMemory {
       }
 
       const lastElement = microCodes[microCodes.length - 1];
+      const isBR = BR.find((br) => br.code === lastElement);
+
+      if (isBR) {
+        pl.BR = isBR;
+      }
 
       if (lastElement === "NEXT") {
         pl.ADDR = (lc + 1).toString(2).padStart(7, "0");
-      } else if (!BR.find((br) => br.code === lastElement)) {
+      } else if (!isBR) {
         pl.ADDR = lastElement;
       }
 
@@ -186,6 +196,10 @@ export class MicroProgramMemory {
       }
     }
 
-    console.log("microprogram loaded content: ", this._content);
+    console.log("microprogram loaded content: ", this._CAR, this._content);
+  }
+
+  read(arr: string) {
+    return this._content[parseInt(arr, 2)];
   }
 }
