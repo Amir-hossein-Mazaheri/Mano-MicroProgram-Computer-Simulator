@@ -3,7 +3,8 @@ export function binOperation(
   op2: string,
   operation: "OR" | "AND" | "XOR" | "COM"
 ) {
-  if (op1.length !== op2.length) throw new Error("Invalid operands.");
+  if (operation !== "COM" && op1.length !== op2.length)
+    throw new Error("Invalid operands.");
 
   const operandOne = op1.split("");
   const operandTwo = op2.split("");
