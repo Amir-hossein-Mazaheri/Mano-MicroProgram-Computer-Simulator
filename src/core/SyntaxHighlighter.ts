@@ -1,9 +1,15 @@
 import { BR, CD, F1, F2, F3 } from "../types";
+import { escapeRegExp } from "../utils/getBMPM";
+
+type Type = "MicroProgram" | "Assembly";
 
 export class SyntaxHighlighter {
   private _colors = {
     label: "rgb(255, 255, 255)",
     name: "rgb(255, 255, 255)",
+    org: "rgb(255 242 144)",
+    orgOperand: "rgb(255 140 0)",
+    end: "rgb(255 242 144)",
     microProgramOperation: "rgb(102,132,225)",
     microProgramCD: "rgb(31,173,131)",
     microProgramBR: "rgb(215,55,55)",
@@ -15,16 +21,14 @@ export class SyntaxHighlighter {
     assemblyNumber: "rgb(212,53,82)",
   };
 
-  constructor(private _type: "MicroProgram" | "Assembly") {}
+  constructor(private _type: Type) {}
 
   private _microProgram(lines: string[]) {
-    const parsedLines = [];
-
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
       if (!line.trim()) {
-        parsedLines.push(`<br />`);
+        lines[i] = `<br />`;
         continue;
       }
 
@@ -56,7 +60,6 @@ export class SyntaxHighlighter {
 
         if (microOperation === " ") {
           whiteSpace += "&nbsp;";
-
           continue;
         }
 
@@ -75,7 +78,13 @@ export class SyntaxHighlighter {
         } else if (br) {
           color = this._colors.microProgramBR;
         } else {
-          color = this._colors.microProgramADDR;
+          if (microOperation === "ORG") {
+            color = this._colors.org;
+          } else if (!isNaN(parseInt(microOperation))) {
+            color = this._colors.orgOperand;
+          } else {
+            color = this._colors.microProgramADDR;
+          }
         }
 
         const shouldHaveComma = !![...F2, ...F2, ...F3].find(
@@ -93,22 +102,106 @@ export class SyntaxHighlighter {
 
       const hasName = pLine[0].includes("::::");
 
-      console.log("Pline: ", pLine);
-
-      parsedLines.push(
-        `<p>${
-          hasName
-            ? pLine[0].replace("::::", ":") + pLine.slice(1).join("&nbsp;")
-            : pLine.join("&nbsp;")
-        }</p>`
-      );
+      lines[i] = `<p>${
+        hasName
+          ? pLine[0].replace("::::", ":") + pLine.slice(1).join("&nbsp;")
+          : pLine.join("&nbsp;")
+      }</p>`;
     }
 
-    return parsedLines.join("\n");
+    return lines.join("\n");
   }
 
   private _assembly(lines: string[]) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      const pLine = [];
+
+      if (!line.trim()) {
+        lines[i] = `<br />`;
+        continue;
+      }
+
+      const withComment = line.split("/");
+      let comment = "";
+
+      if (withComment.length > 1) {
+        comment = `<span style="display: inline; color: ${
+          this._colors.comment
+        }">/${withComment
+          .slice(1)
+          .join("/")
+          .replace(new RegExp(escapeRegExp(" "), "g"), "&nbsp;")}</span>`;
+      }
+
+      const withLabel = withComment[0].split(",");
+
+      if (withLabel.length > 1) {
+        pLine.push(
+          `<span style="color: ${this._colors.label}">${withLabel[0]},</span>`
+        );
+
+        withLabel.shift();
+      }
+
+      const withInstruction = withLabel[0].split(" ");
+      const [operation, operand] = withInstruction.filter((i) => !!i.trim());
+
+      let whiteSpace = "";
+
+      for (let j = 0; j < withInstruction.length; j++) {
+        const instruction = withInstruction[j];
+
+        if (instruction === "") {
+          whiteSpace += "&nbsp;";
+          continue;
+        }
+
+        pLine.push(whiteSpace + instruction);
+        whiteSpace = "";
+      }
+
+      if (whiteSpace !== "") {
+        pLine[pLine.length - 1] += whiteSpace;
+      }
+
+      let operationColor = this._colors.assemblyOperation;
+      let operandColor = this._colors.assemblyOperand;
+
+      if (!operand) {
+        [operandColor, operationColor] = [operationColor, operandColor];
+
+        if (pLine[pLine.length - 1].includes("END")) {
+          operandColor = this._colors.end;
+        }
+      } else if (operation.includes("ORG")) {
+        operationColor = this._colors.org;
+        operandColor = this._colors.orgOperand;
+      } else if (operation.includes("HEX") || operation.includes("DEC")) {
+        operandColor = this._colors.assemblyNumber;
+      }
+
+      if (operand) {
+        pLine[pLine.length - 1] = `<span style="color: ${operandColor}">&nbsp;${
+          pLine[pLine.length - 1]
+        }</span>`;
+      }
+
+      pLine[pLine.length - (operand ? 2 : 1)] = `<span style="color: ${
+        operand ? operationColor : operandColor
+      }">${pLine[pLine.length - (operand ? 2 : 1)]}</span>`;
+
+      comment && pLine.push(comment);
+
+      lines[i] = `<p>${pLine.join("")}</p>`;
+    }
+
     return lines.join("\n");
+  }
+
+  setType(type: Type) {
+    return new SyntaxHighlighter(type);
   }
 
   public highlight(code: string) {
