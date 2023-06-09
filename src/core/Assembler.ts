@@ -77,13 +77,17 @@ export class Assembler {
       const withoutComment = line.split("/");
       const withLabel = withoutComment[0].trim().split(",");
 
-      let hasLabel = false;
+      let label: string | null = NO_LABEL;
 
       if (withLabel[0] && withLabel.length > 1) {
-        hasLabel = true;
+        const lb = withLabel.shift();
+
+        if (lb) {
+          label = lb;
+        }
       }
 
-      if (hasLabel && withLabel[0].toUpperCase() !== withLabel[0]) {
+      if (label && withLabel[0].toUpperCase() !== withLabel[0]) {
         this._warns.push(
           `Label at line ${
             i + 1
@@ -91,9 +95,7 @@ export class Assembler {
         );
       }
 
-      const [instruction, operand, indirect] = withLabel[hasLabel ? 1 : 0]
-        .trim()
-        .split(" ");
+      const [instruction, operand, indirect] = withLabel[0].trim().split(" ");
 
       if (instruction === "ORG") {
         lineCounter = +operand;
@@ -119,7 +121,7 @@ export class Assembler {
         );
 
         this._assembledLines[lineCounter] = new AssemblyLine(
-          hasLabel ? withLabel[0] : NO_LABEL,
+          label,
           lineCounter,
           instruction,
           operand,
@@ -132,7 +134,7 @@ export class Assembler {
         foundInstruction = true;
 
         this._assembledLines[lineCounter] = new AssemblyLine(
-          hasLabel ? withLabel[0] : NO_LABEL,
+          label,
           lineCounter,
           instruction,
           operand,
@@ -153,7 +155,7 @@ export class Assembler {
             }
 
             this._assembledLines[lineCounter] = new AssemblyLine(
-              hasLabel ? withLabel[0] : NO_LABEL,
+              label,
               lineCounter,
               instruction,
               operand,
