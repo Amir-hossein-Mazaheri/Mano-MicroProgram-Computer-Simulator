@@ -1,6 +1,6 @@
 import microProgramMemory from "../../microprogram_memory.txt?raw";
 
-function escapeRegExp(str: string) {
+export function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
