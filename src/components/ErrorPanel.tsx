@@ -21,7 +21,7 @@ const ErrorPanel: React.FC<ErrorPanelProps> = ({ error, warns, className }) => {
         {error ? "Errors" : "Warns"}
       </h3>
 
-      <div className="space-y-8 px-6 py-8">
+      <div className="max-h-60  space-y-8 overflow-auto px-6 py-8">
         {error ? (
           <p className="font-bold text-red-500">{error}</p>
         ) : (
