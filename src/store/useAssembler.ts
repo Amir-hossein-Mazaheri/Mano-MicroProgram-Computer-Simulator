@@ -1,14 +1,11 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-import { getBMPM } from "../utils/getBMPM";
 import { AssemblyLine } from "../core/AssemblyLine";
 import { MicroProgramMemory } from "../core/MicroProgramMemory";
 
 interface InitialState {
   isAssembling: boolean;
-  assembly: string;
-  microProgram: string;
   error: string;
   warns: string[];
   assembled: Record<number, AssemblyLine>;
@@ -17,8 +14,6 @@ interface InitialState {
 
 interface UseAssembler extends InitialState {
   setIsAssembling: (isAssembling: boolean) => void;
-  setAssembly: (assembly: string) => void;
-  setMicroProgram: (microProgram: string) => void;
   setError: (error: string) => void;
   setWarns: (warns: string[]) => void;
   setAssembled: (assembled: Record<number, AssemblyLine>) => void;
@@ -26,8 +21,6 @@ interface UseAssembler extends InitialState {
 
 const initialState: InitialState = {
   isAssembling: false,
-  assembly: "",
-  microProgram: getBMPM(),
   error: "",
   warns: [],
   assembled: {},
@@ -41,18 +34,6 @@ export const useAssembler = create(
     setIsAssembling(isAssembling) {
       set((state) => {
         state.isAssembling = isAssembling;
-      });
-    },
-
-    setAssembly(assembly) {
-      set((state) => {
-        state.assembly = assembly;
-      });
-    },
-
-    setMicroProgram(microProgram) {
-      set((state) => {
-        state.microProgram = microProgram;
       });
     },
 

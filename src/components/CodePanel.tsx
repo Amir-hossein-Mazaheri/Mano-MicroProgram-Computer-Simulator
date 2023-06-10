@@ -5,7 +5,10 @@ import { SyntaxHighlighter } from "../core/SyntaxHighlighter";
 import Button from "./Button";
 import { useAssembler } from "../store/useAssembler";
 import { Assembler } from "../core/Assembler";
+import { useState } from "react";
 import { toast } from "react-toastify";
+
+import { getBMPM } from "../utils/getBMPM";
 
 interface PanelProps {
   className?: string;
@@ -14,14 +17,13 @@ interface PanelProps {
 const syntaxHighlighter = new SyntaxHighlighter("MicroProgram");
 
 const CodePanel: React.FC<PanelProps> = ({ className }) => {
+  const [assembly, setAssembly] = useState("");
+  const [microProgram, setMicroProgram] = useState(getBMPM());
+
   const {
-    assembly,
-    microProgram,
     isAssembling,
     microProgramMemory,
-    setAssembly,
     setAssembled,
-    setMicroProgram,
     setIsAssembling,
     setError,
     setWarns,
@@ -30,6 +32,7 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
   const handleAssembling = () => {
     setError("");
     setWarns([]);
+    setAssembled({});
     setIsAssembling(true);
 
     setTimeout(() => {

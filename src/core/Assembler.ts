@@ -2,6 +2,7 @@ import { NO_LABEL } from "../types";
 import { toBin } from "../utils/toBin";
 import { AssemblyLine } from "./AssemblyLine";
 import { MicroProgramMemory } from "./MicroProgramMemory";
+import { Signal } from "./Signal";
 
 export const ioRef = [
   { code: "INP", binary: "1111100000000000" },
@@ -14,6 +15,7 @@ export const ioRef = [
 ] as const;
 
 export class Assembler {
+  private _signal = Signal.create();
   private _code = "";
   private _assembledLines: Record<number, AssemblyLine> = {};
   private _warns: string[] = [];
@@ -197,7 +199,7 @@ export class Assembler {
           if (this._assembledLines[newKey].label === operand) {
             this._assembledLines[key].operand = (+newKey)
               .toString(2)
-              .padStart(12, "0");
+              .padStart(11, "0");
             break;
           }
         }
@@ -214,6 +216,8 @@ export class Assembler {
   assemble(): [Record<number, AssemblyLine>, string[]] {
     this._stageOne();
     this._stageTwo();
+
+    this._signal.assemble();
 
     return [this._assembledLines, this._warns];
   }

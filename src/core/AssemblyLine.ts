@@ -15,6 +15,8 @@ export class AssemblyLine {
   ) {}
 
   get label() {
+    if (!this._label) return "NO_LABEL";
+
     return this._label;
   }
 
@@ -27,6 +29,8 @@ export class AssemblyLine {
   }
 
   get instruction() {
+    if (!this._instruction) return "EMPTY";
+
     return this._instruction;
   }
 
@@ -63,13 +67,9 @@ export class AssemblyLine {
   }
 
   get binary() {
-    if (this._oppCode.length > 4) return this._oppCode;
+    if (this._isNumber || this._ioRef) return this._oppCode;
 
-    return (
-      (this._indirect ? "1" : "0") +
-      this._oppCode +
-      (+this._operand).toString(2)
-    );
+    return (this._indirect ? "1" : "0") + this._oppCode + this._operand;
   }
 
   set binary(binary: string) {
