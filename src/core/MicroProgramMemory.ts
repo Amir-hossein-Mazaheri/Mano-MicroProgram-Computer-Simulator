@@ -122,8 +122,6 @@ export class MicroProgramMemory {
           fetchAddr = lc.toString(2).padStart(7, "0");
       }
 
-      console.log("microcodes: ", microCodes);
-
       for (let i = 0; i < microCodes.length - 1; i++) {
         const microCode = microCodes[i];
 

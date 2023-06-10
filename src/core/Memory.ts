@@ -1,49 +1,74 @@
 import { NO_LABEL } from "../types";
 import { AssemblyLine } from "./AssemblyLine";
+import { Signal } from "./Signal";
 
-/**
- * This class follows Singleton design patter
- */
 export class Memory {
-  private static _instance: Memory;
+  private _memorySize = 2048;
+  private _signal = Signal.create();
   private _content: AssemblyLine[] = [];
   private _start = -1;
+  private _end = -1;
 
-  private constructor(assembledLines: Record<number, AssemblyLine>) {
-    for (let i = 0; i < 2048; i++) {
-      this._content.push(
-        new AssemblyLine(NO_LABEL, -1, "", "", false, "0000000000000000", false)
-      );
+  constructor(assembledLines: Record<number, AssemblyLine>) {
+    const values = Object.values(assembledLines);
+
+    if (!values.length) {
+      return;
     }
 
-    this._fillContent(assembledLines);
-  }
+    this._start = values[0].ln;
+    this._end = this._start + values.length;
 
-  static create(assembledLines: Record<number, AssemblyLine>) {
-    if (!this._instance) {
-      this._instance = new Memory(assembledLines);
-    }
-
-    return this._instance;
-  }
-
-  private _fillContent(assembledLines: Record<number, AssemblyLine>) {
-    this._start = Object.values(assembledLines)[0].ln;
-
-    for (const key in assembledLines) {
-      this._content[key] = assembledLines[key];
+    for (let i = 0; i < this._memorySize; i++) {
+      if (assembledLines[i]) {
+        this._content.push(assembledLines[i]);
+      } else {
+        this._content.push(
+          new AssemblyLine(
+            NO_LABEL,
+            i,
+            "",
+            "",
+            false,
+            "0000000000000000",
+            false
+          )
+        );
+      }
     }
   }
 
   read(arr: string) {
+    setTimeout(() => {
+      this._signal.memoryRead(arr);
+    }, 300);
+
     return this._content[parseInt(arr, 2)];
   }
 
   write(arr: string, content: AssemblyLine) {
     this._content[parseInt(arr, 2)] = content;
+
+    setTimeout(() => {
+      this._signal.memoryWrite(arr);
+    }, 300);
   }
 
   get start() {
     return this._start;
+  }
+
+  get end() {
+    return this._end;
+  }
+
+  get content() {
+    return Object.freeze(this._content);
+  }
+
+  get size() {
+    if (!this._content.length) return 0;
+
+    return this._memorySize;
   }
 }
