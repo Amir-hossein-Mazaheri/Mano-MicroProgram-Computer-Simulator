@@ -1,17 +1,26 @@
-import { useEffect } from "react";
+import { ToastContainer } from "react-toastify";
 
-import { Parser } from "./core/Parser";
+import CodePanel from "./components/CodePanel";
+import MemoryInspector from "./components/MemoryInspector";
+import Bar from "./components/Bar";
+import SignalContextProvider from "./context/SignalContextProvider";
+
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  useEffect(() => {
-    const p = new Parser(
-      `ORG 100 /something new\nLDA SUB\nCMA\nINC\nADD MIN /Add\nSTA DIF\nHLT\nMIN, DEC 83\nSUB, DEC -23\nDIF, HEX 0\nEND\n`
-    );
+  return (
+    <SignalContextProvider>
+      <div className="flex min-h-screen w-full flex-col bg-gray-900 text-white">
+        <Bar />
+        <div className="flex w-full grow justify-between py-10">
+          <CodePanel className="flex-1" />
+          <MemoryInspector className="flex-1" />
+        </div>
+      </div>
 
-    p.clearLabel().clearOperandsLabel();
-  }, []);
-
-  return <></>;
+      <ToastContainer position="top-right" theme="dark" />
+    </SignalContextProvider>
+  );
 }
 
 export default App;
