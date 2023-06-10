@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-virtual": "3.0.0-beta.54",
     "immer": "^10.0.2",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.3.0",
