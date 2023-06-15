@@ -109,7 +109,6 @@ export class Assembler {
         break;
       }
 
-      let k = 0;
       lastInstruction = instruction;
 
       const io = ioRef.find((io) => io.code === instruction);
@@ -150,11 +149,7 @@ export class Assembler {
 
           if (content.name === instruction) {
             foundInstruction = true;
-            let oppCode = k.toString(2);
-
-            if (oppCode.length < 4) {
-              oppCode = oppCode.padStart(4, "0");
-            }
+            const oppCode = toBin(+key / 4, 4);
 
             this._assembledLines[lineCounter] = new AssemblyLine(
               label,
@@ -168,8 +163,6 @@ export class Assembler {
 
             break;
           }
-
-          if (content.name) k++;
         }
       }
 
