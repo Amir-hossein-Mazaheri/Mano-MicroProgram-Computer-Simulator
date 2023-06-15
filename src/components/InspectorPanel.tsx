@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { shallow } from "zustand/shallow";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import ErrorPanel from "./ErrorPanel";
 import { useAssembler } from "../store/useAssembler";
 import { Memory } from "../core/Memory";
+import ActionsPanel from "./ActionsPanel";
+import { SignalContext } from "../context/SignalContext";
 
 interface MemoryInspectorProps {
   className?: string;
@@ -12,10 +14,18 @@ interface MemoryInspectorProps {
 
 const tableRow = "text-sm w-[20%] text-left py-4 px-6";
 
-const MemoryInspector: React.FC<MemoryInspectorProps> = ({ className }) => {
+const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
   const parentRef = useRef<HTMLTableSectionElement>(null);
 
-  const { warns, error, assembled } = useAssembler((store) => store, shallow);
+  const [readingLine, setReadingLine] = useState(-1);
+  const [writingLine, setWritingLine] = useState(-1);
+
+  const signalContext = useContext(SignalContext);
+
+  const { warns, error, assembled, isAssembling, setMemory } = useAssembler(
+    (store) => store,
+    shallow
+  );
 
   const memory = useMemo(() => new Memory(assembled), [assembled]);
 
@@ -25,13 +35,49 @@ const MemoryInspector: React.FC<MemoryInspectorProps> = ({ className }) => {
       getScrollElement: () => parentRef.current,
       estimateSize: () => 60,
       overscan: 5,
-      initialOffset: memory.start,
     });
 
   const items = getVirtualItems();
 
+  useEffect(() => {
+    setMemory(memory);
+  }, [memory, setMemory]);
+
+  useEffect(() => {
+    if (memory.end === -1) return;
+
+    scrollToIndex(memory.end);
+  }, [memory.end, scrollToIndex]);
+
+  useEffect(() => {
+    signalContext.signal.memoryWrite = (arr) => {
+      setWritingLine(parseInt(arr, 2));
+
+      setTimeout(() => setWritingLine(-1), 200);
+    };
+
+    signalContext.signal.memoryWrite = (arr) => {
+      setReadingLine(parseInt(arr, 2));
+
+      setTimeout(() => setReadingLine(-1), 200);
+    };
+  }, [signalContext.signal]);
+
+  if (!Object.keys(assembled).length || isAssembling) {
+    return (
+      <div className={`px-6 py-2 text-center ${className}`}>
+        <div className="rounded-lg bg-sky-500 px-12 py-8">
+          <p className="font-semibold">
+            You haven't assembled your code yet. Click on the{" "}
+            <strong className="text-black">Assemble</strong> button
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex flex-col justify-between px-8 ${className}`}>
+    <div className={`flex flex-col gap-5 px-8 ${className}`}>
       <div className="overflow-hidden rounded-xl">
         <div className="">
           <div className="w-full table-auto border-collapse bg-gray-800">
@@ -41,7 +87,7 @@ const MemoryInspector: React.FC<MemoryInspectorProps> = ({ className }) => {
               <div className={tableRow}>Instruction</div>
               <div className={tableRow}>Binary</div>
             </div>
-            {memory.size > 0 ? (
+            {memory.size > 0 && (
               <div
                 className="w-full overflow-y-auto"
                 style={{ contain: "strict", height: 380 }}
@@ -67,7 +113,14 @@ const MemoryInspector: React.FC<MemoryInspectorProps> = ({ className }) => {
                       <div
                         key={key}
                         ref={measureElement}
-                        className="flex"
+                        className={`flex border-b-[1.3px] border-white/30 ${
+                          !memory.content[index].isEmpty() &&
+                          readingLine !== index &&
+                          writingLine !== index &&
+                          "bg-green-500/30"
+                        } ${readingLine === index && "bg-sky-500/30"} ${
+                          writingLine === index && "bg-red-500/30"
+                        }`}
                         data-index={index}
                       >
                         <div className={tableRow}>
@@ -87,16 +140,16 @@ const MemoryInspector: React.FC<MemoryInspectorProps> = ({ className }) => {
                   </div>
                 </div>
               </div>
-            ) : (
-              "Empty"
             )}
           </div>
         </div>
       </div>
+
+      <ActionsPanel />
 
       <ErrorPanel warns={warns} error={error} />
     </div>
   );
 };
 
-export default MemoryInspector;
+export default InspectorPanel;
