@@ -42,18 +42,18 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({ className }) => {
     signalContext.signal.registerWrite = (register) => {
       setWritingRegister(register);
 
-      setTimeout(() => setWritingRegister(""), 200);
+      setTimeout(() => setWritingRegister(""), 300);
     };
 
     signalContext.signal.registerRead = (register) => {
       setReadingRegister(register);
 
-      setTimeout(() => setReadingRegister(""), 200);
+      setTimeout(() => setReadingRegister(""), 300);
     };
   }, [signalContext.signal]);
 
   return (
-    <div>
+    <div className={`${className}`}>
       <div className="mb-12 mt-5 flex flex-wrap gap-6 rounded-xl px-6 py-4 outline outline-[1px]">
         {registers.map((r) => (
           <p
