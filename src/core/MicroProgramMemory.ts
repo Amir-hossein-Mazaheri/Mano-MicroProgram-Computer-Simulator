@@ -34,7 +34,7 @@ export class MicroProgramMemory {
   set instructions(instructions: string) {
     this._instructions =
       instructions +
-      "\nORG 64\nFETCH: PCTAR U JMP NEXT\nREAD INCPC U JMP NEXT\nDRTAR U MAP\nINDRCT: READ U JMP NEXT\nDRTAR U RET";
+      "\nORG 64\nFETCH: PCTAR U JMP NEXT\nREAD INCPC U JMP NEXT\nDRTAR U MAP\nORG 68\nINDRCT: READ U JMP NEXT\nDRTAR U RET";
   }
 
   get SBR() {
@@ -102,8 +102,8 @@ export class MicroProgramMemory {
         if (orgOperand < 0)
           throw new Error(`"ORG" operand cannot be negative number.`);
 
-        if (orgOperand > 64)
-          throw new Error(`"ORG" operand must be smaller that "64"`);
+        // if (orgOperand > 64)
+        //   throw new Error(`"ORG" operand must be smaller that "64"`);
 
         lc = orgOperand;
 
