@@ -1,3 +1,5 @@
+import { Register } from "../types";
+
 export class Signal {
   private static _instance: Signal;
 
@@ -8,6 +10,12 @@ export class Signal {
     //
   };
   private _memoryRead = (arr: string) => {
+    //
+  };
+  private _registerWrite = (register: Register) => {
+    //
+  };
+  private _registerRead = (register: Register) => {
     //
   };
   private _step = () => {
@@ -51,6 +59,22 @@ export class Signal {
 
   set memoryRead(memoryRead: (arr: string) => void) {
     this._memoryRead = memoryRead;
+  }
+
+  get registerWrite() {
+    return this._registerWrite;
+  }
+
+  set registerWrite(registerWrite: (register: Register) => void) {
+    this._registerWrite = registerWrite;
+  }
+
+  get registerRead() {
+    return this._registerRead;
+  }
+
+  set registerRead(registerRead: (register: Register) => void) {
+    this._registerRead = registerRead;
   }
 
   get step() {
