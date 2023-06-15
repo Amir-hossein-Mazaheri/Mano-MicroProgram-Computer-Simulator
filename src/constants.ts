@@ -1,4 +1,4 @@
-export const NO_LABEL = null;
+export const NO_LABEL = "NO LABEL";
 
 export const F1 = [
   { code: "NOP", binary: "000" },
