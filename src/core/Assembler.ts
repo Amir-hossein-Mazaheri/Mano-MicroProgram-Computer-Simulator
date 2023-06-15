@@ -1,18 +1,8 @@
-import { NO_LABEL } from "../constants";
+import { NO_LABEL, ioRef } from "../constants";
 import { toBin } from "../utils/toBin";
 import { AssemblyLine } from "./AssemblyLine";
 import { MicroProgramMemory } from "./MicroProgramMemory";
 import { Signal } from "./Signal";
-
-export const ioRef = [
-  { code: "INP", binary: "1111100000000000" },
-  { code: "OUT", binary: "1111010000000000" },
-  { code: "SKI", binary: "1111001000000000" },
-  { code: "SKO", binary: "1111000100000000" },
-  { code: "ION", binary: "1111000010000000" },
-  { code: "IOF", binary: "1111000001000000" },
-  { code: "HLT", binary: "0111000000000001" },
-] as const;
 
 export class Assembler {
   private _signal = Signal.create();

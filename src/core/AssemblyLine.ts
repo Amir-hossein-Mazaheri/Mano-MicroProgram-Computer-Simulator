@@ -1,5 +1,5 @@
+import { ioRef } from "../constants";
 import { NO_LABEL } from "../types";
-import { ioRef } from "./Assembler";
 import { MicroProgramMemory } from "./MicroProgramMemory";
 
 export class AssemblyLine {

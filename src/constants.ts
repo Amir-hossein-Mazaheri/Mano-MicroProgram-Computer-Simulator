@@ -46,4 +46,14 @@ export const BR = [
   { code: "MAP", binary: "11" },
 ] as const;
 
+export const ioRef = [
+  { code: "INP", binary: "1111100000000000" },
+  { code: "OUT", binary: "1111010000000000" },
+  { code: "SKI", binary: "1111001000000000" },
+  { code: "SKO", binary: "1111000100000000" },
+  { code: "ION", binary: "1111000010000000" },
+  { code: "IOF", binary: "1111000001000000" },
+  { code: "HLT", binary: "0111000000000001" },
+] as const;
+
 export const registers = ["AR", "PC", "DR", "AC"] as const;
