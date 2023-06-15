@@ -53,25 +53,27 @@ const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
     signalContext.signal.memoryWrite = (arr) => {
       setWritingLine(parseInt(arr, 2));
 
-      setTimeout(() => setWritingLine(-1), 200);
+      setTimeout(() => setWritingLine(-1), 500);
     };
 
-    signalContext.signal.memoryWrite = (arr) => {
+    signalContext.signal.memoryRead = (arr) => {
       setReadingLine(parseInt(arr, 2));
 
-      setTimeout(() => setReadingLine(-1), 200);
+      setTimeout(() => setReadingLine(-1), 500);
     };
   }, [signalContext.signal]);
 
   if (!Object.keys(assembled).length || isAssembling) {
     return (
-      <div className={`px-6 py-2 text-center ${className}`}>
-        <div className="rounded-lg bg-sky-500 px-12 py-8">
+      <div className={`px-6 py-2 ${className}`}>
+        <div className="rounded-lg bg-sky-500 px-12 py-8 text-center">
           <p className="font-semibold">
             You haven't assembled your code yet. Click on the{" "}
             <strong className="text-black">Assemble</strong> button
           </p>
         </div>
+
+        <ErrorPanel className="mt-8" warns={warns} error={error} />
       </div>
     );
   }
