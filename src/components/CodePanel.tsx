@@ -1,13 +1,12 @@
+import { useState } from "react";
 import { shallow } from "zustand/shallow";
+import { toast } from "react-toastify";
 
 import Editor from "./Editor";
 import { SyntaxHighlighter } from "../core/SyntaxHighlighter";
 import Button from "./Button";
 import { useAssembler } from "../store/useAssembler";
 import { Assembler } from "../core/Assembler";
-import { useState } from "react";
-import { toast } from "react-toastify";
-
 import { getBMPM } from "../utils/getBMPM";
 
 interface PanelProps {
@@ -16,6 +15,10 @@ interface PanelProps {
 
 const syntaxHighlighter = new SyntaxHighlighter("MicroProgram");
 
+/**
+ * CodePanel lets user write and modify two major things "Micro Program Memory" and "Assembly Code"
+ * through a nice and pretty syntax highlighted editor also it lets user to assemble the code
+ */
 const CodePanel: React.FC<PanelProps> = ({ className }) => {
   const [assembly, setAssembly] = useState("");
   const [microProgram, setMicroProgram] = useState(getBMPM());

@@ -3,6 +3,9 @@ import { escapeRegExp } from "../utils/getBMPM";
 
 type Type = "MicroProgram" | "Assembly";
 
+/**
+ * Core class for syntax highlighting Micro Program and Assembly code
+ */
 export class SyntaxHighlighter {
   private _colors = {
     label: "rgb(255, 255, 255)",

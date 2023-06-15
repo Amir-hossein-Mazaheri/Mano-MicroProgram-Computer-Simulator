@@ -2,6 +2,9 @@ import { NO_LABEL } from "../constants";
 import { AssemblyLine } from "./AssemblyLine";
 import { Signal } from "./Signal";
 
+/**
+ * Simple representation of the memory with methods like read and write.
+ */
 export class Memory {
   private _memorySize = 2048;
   private _signal = Signal.create();

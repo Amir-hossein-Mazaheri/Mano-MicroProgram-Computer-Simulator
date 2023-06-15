@@ -14,6 +14,10 @@ interface MemoryInspectorProps {
 
 const tableRow = "text-sm w-[20%] text-left py-4 px-6";
 
+/**
+ * This component shows current memory also ActionsPanel and ErrorPanel and
+ * lets user to interact with the "Core Module"
+ */
 const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
   const parentRef = useRef<HTMLTableSectionElement>(null);
 
@@ -53,13 +57,13 @@ const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
     signalContext.signal.memoryWrite = (arr) => {
       setWritingLine(parseInt(arr, 2));
 
-      setTimeout(() => setWritingLine(-1), 500);
+      setTimeout(() => setWritingLine(-1), 300);
     };
 
     signalContext.signal.memoryRead = (arr) => {
       setReadingLine(parseInt(arr, 2));
 
-      setTimeout(() => setReadingLine(-1), 500);
+      setTimeout(() => setReadingLine(-1), 300);
     };
   }, [signalContext.signal]);
 

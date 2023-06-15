@@ -1,5 +1,10 @@
 import { Register } from "../types";
 
+/**
+ * This class provide a nice way for the CPU and Memory classes to
+ * signal the UI that something has changed e.g. a register has been written or read,
+ * also the same for memory slut read or write
+ */
 export class Signal {
   private static _instance: Signal;
 

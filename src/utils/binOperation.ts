@@ -1,3 +1,7 @@
+/**
+ * Performs a binary operation on two\one binary numbers.
+ * e.g. "or", "and", "xor", and "one's complement"
+ */
 export function binOperation(
   op1: string,
   op2: string,

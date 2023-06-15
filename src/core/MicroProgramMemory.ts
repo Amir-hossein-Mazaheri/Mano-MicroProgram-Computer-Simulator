@@ -2,7 +2,8 @@ import { F1, F2, F3, CD, BR } from "../constants";
 import { MicroProgramLine } from "./MicroProgramLine";
 
 /**
- * This class follows Singleton design patter
+ * Representation of Micro Program Memory with access to "CAR" and "SBR" registers
+ * also assemble micro program memory raw code into set of MicroProgramLines
  */
 export class MicroProgramMemory {
   private static _instance: MicroProgramMemory;

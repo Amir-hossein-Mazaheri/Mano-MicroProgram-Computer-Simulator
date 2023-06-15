@@ -4,6 +4,9 @@ import { AssemblyLine } from "./AssemblyLine";
 import { MicroProgramMemory } from "./MicroProgramMemory";
 import { Signal } from "./Signal";
 
+/**
+ * Simply assemble the raw code into set of AssemblyLines with ability to detect errors and gether warnings
+ */
 export class Assembler {
   private _signal = Signal.create();
   private _code = "";

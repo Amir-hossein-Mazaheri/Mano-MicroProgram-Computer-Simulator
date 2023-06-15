@@ -12,6 +12,11 @@ interface ActionsPanelProps {
   className?: string;
 }
 
+/**
+ * This component shows current registers and lets user to interact with through
+ * three main action such as "Next Micro Operation", "Next Step" and "Fully Execute"
+ * which are handled by the CPU class
+ */
 const ActionsPanel: React.FC<ActionsPanelProps> = ({ className }) => {
   const [readingRegister, setReadingRegister] = useState<Register | "">("");
   const [writingRegister, setWritingRegister] = useState<Register | "">("");

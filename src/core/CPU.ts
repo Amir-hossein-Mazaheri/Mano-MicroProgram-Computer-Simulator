@@ -9,6 +9,11 @@ import { Memory } from "./Memory";
 import { MicroProgramMemory } from "./MicroProgramMemory";
 import { Signal } from "./Signal";
 
+/**
+ * The main part of the computer which executes the instructions
+ * also contains every micro operation because each micro operation
+ * needs access to registers and its just simpler to be here
+ */
 export class CPU {
   private _signal = Signal.create();
 

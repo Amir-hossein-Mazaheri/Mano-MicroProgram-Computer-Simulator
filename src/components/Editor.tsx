@@ -9,6 +9,9 @@ interface EditorProps {
   className?: string;
 }
 
+/**
+ * Super simple and nice editor with syntax highlighting support
+ */
 const Editor: React.FC<EditorProps> = ({
   title,
   value,

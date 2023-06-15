@@ -6,6 +6,9 @@ interface ErrorPanelProps {
   className?: string;
 }
 
+/**
+ * ErrorPanel shows error and warns after assembling the code wether there is any
+ */
 const ErrorPanel: React.FC<ErrorPanelProps> = ({ error, warns, className }) => {
   if (!error && !warns.length) {
     return <></>;

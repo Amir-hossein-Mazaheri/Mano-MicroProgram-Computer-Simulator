@@ -1,5 +1,8 @@
 import type { BR, CD, F1, F2, F3 } from "../types";
 
+/**
+ * An abstraction of each line of the micro program
+ */
 export class MicroProgramLine {
   private _name: string | null = null;
   private _F1: F1 = { code: "NOP", binary: "000" };

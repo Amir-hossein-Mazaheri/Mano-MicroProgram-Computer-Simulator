@@ -5,6 +5,9 @@ interface SignalContextProviderProps {
   children: React.ReactNode;
 }
 
+/**
+ * Provides an instance of Signal class to its children
+ */
 const SignalContextProvider: React.FC<SignalContextProviderProps> = ({
   children,
 }) => {

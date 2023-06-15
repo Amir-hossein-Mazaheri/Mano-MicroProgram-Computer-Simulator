@@ -2,6 +2,9 @@ import { ioRef } from "../constants";
 import { NO_LABEL } from "../types";
 import { MicroProgramMemory } from "./MicroProgramMemory";
 
+/**
+ * An abstraction of each line of the assembly code also Memory line
+ */
 export class AssemblyLine {
   constructor(
     private _label: string | NO_LABEL,
