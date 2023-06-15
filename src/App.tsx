@@ -1,7 +1,7 @@
 import { ToastContainer } from "react-toastify";
 
 import CodePanel from "./components/CodePanel";
-import MemoryInspector from "./components/MemoryInspector";
+import InspectorPanel from "./components/InspectorPanel";
 import Bar from "./components/Bar";
 import SignalContextProvider from "./context/SignalContextProvider";
 
@@ -12,9 +12,9 @@ function App() {
     <SignalContextProvider>
       <div className="flex min-h-screen w-full flex-col bg-gray-900 text-white">
         <Bar />
-        <div className="flex w-full grow justify-between py-10">
+        <div className="flex w-full grow justify-between py-8 pb-10">
           <CodePanel className="flex-1" />
-          <MemoryInspector className="flex-1" />
+          <InspectorPanel className="flex-1" />
         </div>
       </div>
 
