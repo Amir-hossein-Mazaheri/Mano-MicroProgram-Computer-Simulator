@@ -3,6 +3,7 @@ import { immer } from "zustand/middleware/immer";
 
 import { AssemblyLine } from "../core/AssemblyLine";
 import { MicroProgramMemory } from "../core/MicroProgramMemory";
+import { Memory } from "../core/Memory";
 
 interface InitialState {
   isAssembling: boolean;
@@ -10,6 +11,7 @@ interface InitialState {
   warns: string[];
   assembled: Record<number, AssemblyLine>;
   microProgramMemory: MicroProgramMemory;
+  memory: Memory;
 }
 
 interface UseAssembler extends InitialState {
@@ -17,6 +19,7 @@ interface UseAssembler extends InitialState {
   setError: (error: string) => void;
   setWarns: (warns: string[]) => void;
   setAssembled: (assembled: Record<number, AssemblyLine>) => void;
+  setMemory: (memory: Memory) => void;
 }
 
 const initialState: InitialState = {
@@ -25,6 +28,7 @@ const initialState: InitialState = {
   warns: [],
   assembled: {},
   microProgramMemory: MicroProgramMemory.create(),
+  memory: new Memory({}),
 };
 
 export const useAssembler = create(
@@ -52,6 +56,12 @@ export const useAssembler = create(
     setAssembled(assembled) {
       set((state) => {
         state.assembled = assembled;
+      });
+    },
+
+    setMemory(memory) {
+      set((state) => {
+        state.memory = memory;
       });
     },
   }))
