@@ -1,18 +1,19 @@
-import { CD, NO_LABEL } from "../types";
+import { NO_LABEL } from "../constants";
+import { CD } from "../types";
 import { binOperation } from "../utils/binOperation";
 import { incBinary } from "../utils/incBinary";
+import { toBin } from "../utils/toBin";
+import { toDecimal } from "../utils/toDecimal";
 import { AssemblyLine } from "./AssemblyLine";
 import { Memory } from "./Memory";
 import { MicroProgramMemory } from "./MicroProgramMemory";
+import { Signal } from "./Signal";
 
-/**
- * This class follows Singleton design patter
- */
 export class CPU {
-  private static _instance: CPU;
+  private _signal = Signal.create();
 
-  private _AR = "00000000000"; //11bit
-  private _PC = "00000000000"; //11bit;
+  private _AR = "00000000000"; //11bit binary address
+  private _PC = "00000000000"; //11bit binary address
   private _DR = new AssemblyLine(
     NO_LABEL,
     -1,
@@ -22,80 +23,147 @@ export class CPU {
     "0000000000000000",
     false,
     true
-  ); //16bit
-  private _AC = "0000000000000000"; //16bit
+  ); //16bit number or instruction
+  private _AC = "0000000000000000"; //16bit number
 
-  private constructor(
+  private _lastMicroOperation: "F1" | "F2" | "F3" = "F3";
+
+  constructor(
     private _microProgramMemory: MicroProgramMemory,
-    private _memory: Memory,
-    pc?: string
+    private _memory: Memory
   ) {
-    this._PC = pc ?? _memory.start.toString(2).padStart(11, "0");
+    if (_memory.start !== -1)
+      this._PC = _memory.start.toString(2).padStart(11, "0");
   }
 
-  static create(
-    microProgramMemory: MicroProgramMemory,
-    memory: Memory,
-    pc?: string
-  ) {
-    if (!this._instance) {
-      this._instance = new CPU(microProgramMemory, memory, pc);
+  micro() {
+    if (this._DR.instruction === "HLT") return false;
+
+    const car = this._microProgramMemory.CAR;
+    const content = this._microProgramMemory.read(car);
+
+    switch (this._lastMicroOperation) {
+      case "F1":
+        this[content.F2.code]();
+
+        this._lastMicroOperation = "F2";
+        break;
+      case "F2":
+        this[content.F3.code]();
+
+        if (this.CD(content.CD)) {
+          this[content.BR.code](car);
+        } else {
+          this._microProgramMemory.CAR = incBinary(
+            this._microProgramMemory.CAR
+          );
+        }
+
+        this._lastMicroOperation = "F3";
+
+        break;
+      case "F3":
+        this[content.F1.code]();
+
+        this._lastMicroOperation = "F1";
+        break;
+    }
+  }
+
+  step() {
+    if (this._DR.instruction === "HLT") return false;
+
+    const car = this._microProgramMemory.CAR;
+    const content = this._microProgramMemory.read(car);
+
+    if (this._lastMicroOperation === "F3") {
+      this[content.F1.code]();
+      this._lastMicroOperation = "F1";
     }
 
-    return this._instance;
+    if (this._lastMicroOperation === "F1") this[content.F2.code]();
+
+    this[content.F3.code]();
+
+    if (this.CD(content.CD)) {
+      this[content.BR.code](car);
+    } else {
+      this._microProgramMemory.CAR = incBinary(this._microProgramMemory.CAR);
+    }
+
+    this._lastMicroOperation = "F3";
+
+    this._signal.step();
+
+    return true;
   }
 
   execute() {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      if (this._DR.instruction === "HLT") {
-        break;
-      }
-
-      const car = this._microProgramMemory.CAR;
-      const content = this._microProgramMemory.read(car);
-
-      this[content.F1.code]();
-      this[content.F2.code]();
-      this[content.F3.code]();
-
-      if (this.CD(content.CD)) {
-        this[content.BR.code](car);
-      } else {
-        this._microProgramMemory.CAR = incBinary(this._microProgramMemory.CAR);
-      }
+    while (this.step()) {
+      //
     }
   }
 
+  get AR() {
+    return this._AR;
+  }
+
+  get AC() {
+    return this._AC;
+  }
+
+  get PC() {
+    return this._PC;
+  }
+
+  get DR() {
+    return this._DR?.binary;
+  }
+
   private NOP() {
-    console.log("Im doing nothing...");
+    //
   }
 
   // START F1
   private ADD() {
-    this._AC = (parseInt(this._AC, 2) + parseInt(this._DR.binary, 2))
-      .toString(2)
-      .padStart(16, "0");
+    this._AC = toBin(toDecimal(this._AC) + toDecimal(this._DR.binary), 16);
+
+    this._signal.registerRead("AC");
+    this._signal.registerWrite("AC");
+    this._signal.registerRead("DR");
   }
 
   private CLRAC() {
     this._AC = "0000000000000000";
+
+    this._signal.registerWrite("AC");
   }
 
   private INCAC() {
     this._AC = incBinary(this._AC);
+
+    this._signal.registerWrite("AC");
   }
 
   private DRTAC() {
     this._AC = this._DR.binary;
+
+    this._signal.registerWrite("AC");
+    this._signal.registerRead("DR");
   }
 
   private DRTAR() {
-    this._AR = this._DR.binary.slice(0, 10);
+    this._AR = this._DR.operand;
+
+    this._signal.registerWrite("AR");
+    this._signal.registerRead("DR");
   }
 
   private PCTAR() {
     this._AR = this._PC;
+
+    this._signal.registerWrite("AR");
+    this._signal.registerRead("PC");
   }
 
   private WRITE() {
@@ -104,44 +172,68 @@ export class CPU {
 
   // START F2
   private SUB() {
-    this._AC = (parseInt(this._AC, 2) - parseInt(this._DR.binary, 2)).toString(
-      2
-    );
+    this._AC = toBin(toDecimal(this._AC) - toDecimal(this._DR.binary), 16);
+
+    this._signal.registerRead("AC");
+    this._signal.registerWrite("AC");
+    this._signal.registerRead("DR");
   }
 
   private OR() {
     this._AC = binOperation(this._AC, this._DR.binary, "OR");
+
+    this._signal.registerRead("AC");
+    this._signal.registerWrite("AC");
+    this._signal.registerRead("DR");
   }
 
   private AND() {
     this._AC = binOperation(this._AC, this._DR.binary, "AND");
+
+    this._signal.registerRead("AC");
+    this._signal.registerWrite("AC");
+    this._signal.registerRead("DR");
   }
 
   private READ() {
     this._DR = this._memory.read(this._AR);
+
+    this._signal.registerWrite("DR");
   }
 
   private ACTDR() {
-    this._DR.binary = this._AC;
+    this._DR.oppCode = this._AC;
+
+    this._signal.registerWrite("AC");
+    this._signal.registerRead("DR");
   }
 
   private INCDR() {
-    if (this._DR.isNumber) {
-      this._DR.oppCode = incBinary(this._DR.oppCode);
-    }
+    this._DR.oppCode = incBinary(this._DR.oppCode);
+
+    this._signal.registerWrite("DR");
   }
 
   private PCTDR() {
-    this._DR.binary = `${this._DR.binary.slice(11)}${this._PC}`;
+    this._DR.operand = this._PC;
+
+    this._signal.registerRead("PC");
+    this._signal.registerWrite("DR");
   }
 
   // START F3
   private XOR() {
     this._AC = binOperation(this._AC, this._DR.binary, "XOR");
+
+    this._signal.registerRead("AC");
+    this._signal.registerRead("DR");
+    this._signal.registerWrite("AC");
   }
 
   private COM() {
     this._AC = binOperation(this._AC, "", "COM");
+
+    this._signal.registerWrite("AC");
   }
 
   private SHL() {
@@ -151,6 +243,8 @@ export class CPU {
     ac.push("0");
 
     this._AC = ac.join("");
+
+    this._signal.registerWrite("AC");
   }
 
   private SHR() {
@@ -160,14 +254,21 @@ export class CPU {
     ac.unshift("0");
 
     this._AC = ac.join("");
+
+    this._signal.registerWrite("AC");
   }
 
   private INCPC() {
     this._PC = incBinary(this._PC);
+
+    this._signal.registerWrite("PC");
   }
 
   private ARTPC() {
     this._PC = this._AR;
+
+    this._signal.registerWrite("AR");
+    this._signal.registerWrite("PC");
   }
 
   private CD(cd: CD) {
