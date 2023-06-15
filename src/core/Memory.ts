@@ -1,4 +1,4 @@
-import { NO_LABEL } from "../types";
+import { NO_LABEL } from "../constants";
 import { AssemblyLine } from "./AssemblyLine";
 import { Signal } from "./Signal";
 
@@ -39,9 +39,7 @@ export class Memory {
   }
 
   read(arr: string) {
-    setTimeout(() => {
-      this._signal.memoryRead(arr);
-    }, 300);
+    this._signal.memoryRead(arr);
 
     return this._content[parseInt(arr, 2)];
   }
@@ -49,9 +47,7 @@ export class Memory {
   write(arr: string, content: AssemblyLine) {
     this._content[parseInt(arr, 2)] = content;
 
-    setTimeout(() => {
-      this._signal.memoryWrite(arr);
-    }, 300);
+    this._signal.memoryWrite(arr);
   }
 
   get start() {
@@ -63,7 +59,7 @@ export class Memory {
   }
 
   get content() {
-    return Object.freeze(this._content);
+    return this._content;
   }
 
   get size() {

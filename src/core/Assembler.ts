@@ -1,4 +1,4 @@
-import { NO_LABEL } from "../types";
+import { NO_LABEL } from "../constants";
 import { toBin } from "../utils/toBin";
 import { AssemblyLine } from "./AssemblyLine";
 import { MicroProgramMemory } from "./MicroProgramMemory";

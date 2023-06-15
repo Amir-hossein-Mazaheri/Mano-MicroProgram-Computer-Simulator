@@ -1,4 +1,4 @@
-import { BR, CD, F1, F2, F3 } from "../types";
+import { F1, F2, F3, CD, BR } from "../constants";
 import { escapeRegExp } from "../utils/getBMPM";
 
 type Type = "MicroProgram" | "Assembly";
