@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 interface ButtonProps {
   onClick: () => void;
-  isLoading: boolean;
+  isLoading?: boolean;
   loadingText?: string;
+  outline?: boolean;
   className?: string;
   children: React.ReactNode;
 }
@@ -12,15 +13,50 @@ const Button: React.FC<ButtonProps> = ({
   isLoading,
   loadingText = "",
   onClick,
+  outline = false,
   className,
   children,
 }) => {
+  const bg = useMemo(() => {
+    if (outline) {
+      return "bg-transparent";
+    }
+
+    if (isLoading) {
+      return "bg-gray-500 ";
+    }
+
+    return "bg-green-500";
+  }, [isLoading, outline]);
+
+  const border = useMemo(() => {
+    if (!outline) {
+      return "border-transparent";
+    }
+
+    if (isLoading) {
+      return "border-gray-300";
+    }
+
+    return "border-green-500";
+  }, [isLoading, outline]);
+
+  const color = useMemo(() => {
+    if (outline) {
+      return "text-green-500";
+    }
+
+    if (isLoading) {
+      return "text-gray-300";
+    }
+
+    return "text-white";
+  }, [isLoading, outline]);
+
   return (
     <button
       disabled={isLoading}
-      className={`rounded-lg border-none ${
-        isLoading ? "bg-gray-500 text-gray-300" : "bg-green-500"
-      } px-8 py-3 font-semibold  outline-none ${className}`}
+      className={`rounded-lg border ${bg} ${border} ${color} px-8 py-3 font-semibold  outline-none ${className}`}
       onClick={onClick}
     >
       {isLoading && (
