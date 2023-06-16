@@ -177,6 +177,8 @@ export class Assembler {
    * their correct memory address also ignores hex operands
    */
   private _stageTwo() {
+    const offset = +Object.keys(this._assembledLines)[0] - 1;
+
     for (const key in this._assembledLines) {
       const operand = this._assembledLines[key].operand;
 
@@ -192,7 +194,9 @@ export class Assembler {
 
         if (operand === this._assembledLines[key].operand) {
           throw new Error(
-            `Cannot find label "${operand}" please check your code!`
+            `Cannot find label "${operand}" at line ${
+              +key + 1 - offset
+            } please check your code!`
           );
         }
       }
