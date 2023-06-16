@@ -38,10 +38,18 @@ After installing all of dependencies you have to build the project:
   pnpm build
 ```
 
-At the end you should run the built project:
+At the end you could do two thing first:
 
 ```bash
   pnpm preview
 ```
 
 After doing all of these steps correctly you should be able to see project at "http://localhost:4173" by you favorite browser.
+
+Or follow these commands to build a desktop app:
+
+```bash
+  pnpm package
+```
+
+And the output in the "out" folder contains an executable which act like the web version
