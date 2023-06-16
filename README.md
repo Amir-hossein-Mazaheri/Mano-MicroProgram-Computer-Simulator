@@ -6,16 +6,17 @@ This is a simulator for computer with power of micro program introduced in Moris
 
 A simple preview of running project:
 
-![preview](https://github.com/Amir-hossein-Mazaheri/Mano-MicroProgram-Computer-Simulator/blob/main/preview.png)
+![preview](https://github.com/Amir-hossein-Mazaheri/Mano-MicroProgram-Computer-Simulator/blob/main/preview.gif)
 
 ## Features
 
-- Pretty Micro Program and Assembly Syntaxt Highlighting Theme
+- Pretty Micro Program and Assembly Syntax Highlighting Theme Just Like an IDE
 - Ability to Run Each Step or Micro Operation
 - Error Handling When Assembling Code
 - Gathering Warnings While Trying to Assemble
-- As Close as Possible to Moris Mano Introduced Micro Program Computer
+- As Close as Possible to Morris Mano Introduced Micro Program Computer
 - Pretty and High Performance Simulator
+- Fully Responsive
 
 ## How to Use
 
