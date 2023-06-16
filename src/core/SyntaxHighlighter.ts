@@ -17,7 +17,7 @@ export class SyntaxHighlighter {
     microProgramCD: "rgb(31,173,131)",
     microProgramBR: "rgb(215,55,55)",
     microProgramADDR: "rgb(184,84,212)",
-    indirect: "rgb(96,172,57)",
+    indirect: "rgb(215,55,55)",
     comment: "rgb(125,122,104)",
     assemblyOperation: "rgb(102,132,225)",
     assemblyOperand: "rgb(31,173,131)",
@@ -139,17 +139,24 @@ export class SyntaxHighlighter {
       }
 
       const withLabel = withComment[0].split(",");
+      let hasLabel = false;
 
       if (withLabel.length > 1) {
         pLine.push(
           `<span style="color: ${this._colors.label}">${withLabel[0]},</span>`
         );
 
+        hasLabel = true;
+
         withLabel.shift();
       }
 
       const withInstruction = withLabel[0].split(" ");
-      const [operation, operand] = withInstruction.filter((i) => !!i.trim());
+      const [operation, operand, indirect] = withInstruction.filter(
+        (i) => !!i.trim()
+      );
+
+      console.log(operation, operand, indirect);
 
       let whiteSpace = "";
 
@@ -185,15 +192,27 @@ export class SyntaxHighlighter {
         operandColor = this._colors.assemblyNumber;
       }
 
+      let offset = 0;
+
+      if (hasLabel) {
+        offset = 1;
+      }
+
+      if (indirect) {
+        pLine[2 + offset] = `<span style="color: ${
+          this._colors.indirect
+        }">&nbsp;${pLine[2 + offset]}</span>`;
+      }
+
       if (operand) {
-        pLine[pLine.length - 1] = `<span style="color: ${operandColor}">&nbsp;${
-          pLine[pLine.length - 1]
+        pLine[1 + offset] = `<span style="color: ${operandColor}">&nbsp;${
+          pLine[1 + offset]
         }</span>`;
       }
 
-      pLine[pLine.length - (operand ? 2 : 1)] = `<span style="color: ${
+      pLine[0 + offset] = `<span style="color: ${
         operand ? operationColor : operandColor
-      }">${pLine[pLine.length - (operand ? 2 : 1)]}</span>`;
+      }">${pLine[0 + offset]}</span>`;
 
       comment && pLine.push(comment);
 
