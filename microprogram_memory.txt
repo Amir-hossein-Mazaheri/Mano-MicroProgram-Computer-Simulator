@@ -1,48 +1,49 @@
-     ORG 0
-ADD: NOP   I  CALL  INDRCT
-     READ  U  JMP   NEXT
-     ADD   U  JMP   FETCH
+          ORG 0
+ADD: NOP   I  CALL    INDRCT
+         READ  U  JMP   NEXT
+         ADD   U  JMP   FETCH
 
-        ORG 4
-BRANCH: NOP    S  JMP   OVER
-        NOP    U  JMP   FETCH
-OVER:   NOP    I  CALL  INDRCT
+                 ORG 4
+BRANCH: NOP     S  JMP   OVER
+                NOP     U  JMP   FETCH
+OVER:      NOP     I  CALL   INDRCT
+               ARTPC  U  JMP   FETCH
+
+        ORG 8
+STA: NOP       I   CALL  INDRCT
+        ACTDR  U  JMP   NEXT
+        WRITE   U  JMP   FETCH
+
+         ORG 12
+EXC: NOP                   I    CALL  INDRCT
+        READ                  U  JMP   NEXT
+        ACTDR DRTAC  U  JMP   NEXT
+        WRITE                U  JMP   FETCH
+
+          ORG 16
+AND: NOP   I    CALL  INDRCT
+         READ U  JMP    NEXT
+         AND  U  JMP    FETCH
+
+       ORG 20
+OR: NOP   I    CALL  INDRCT
+      READ  U  JMP    NEXT
+      OR      U  JMP    FETCH
+
+         ORG 24
+LDA: NOP       I   CALL  INDRCT
+        READ     U  JMP   NEXT
+        DRTAC  U  JMP   FETCH
+
+
+         ORG 28
+BUN: NOP     I    CALL  INDRCT
         ARTPC  U  JMP   FETCH
 
-     ORG 8
-STA: NOP    I  CALL  INDRCT
-     ACTDR  U  JMP   NEXT
-     WRITE  U  JMP   FETCH
 
-     ORG 12
-EXC: NOP          I  CALL  INDRCT
-     READ         U  JMP   NEXT
-     ACTDR DRTAC  U  JMP   NEXT
-     WRITE        U  JMP   FETCH
+         ORG 32
+MUL: NOP      I  CALL  INDRCT
+LOP: CLRAC  U JMP   NEXT 
+        INCAC  U JMP   NEXT
 
-     ORG 16
-AND: NOP  I  CALL  INDRCT
-     READ U  JMP   NEXT
-     AND  U  JMP   FETCH
-
-    ORG 20
-OR: NOP   I  CALL  INDRCT
-    READ  U  JMP   NEXT
-    OR    U  JMP   FETCH
-
-     ORG 24
-LDA: NOP    I  CALL  INDRCT
-     READ   U  JMP   NEXT
-     DRTAC  U  JMP   FETCH
-
-
-     ORG 28
-BUN: NOP    I  CALL  INDRCT
-     ARTPC  U  JMP   FETCH
-
-
-
-     ORG 32
-MUL: NOP  I  CALL INDRCT
-LOP: 
 
