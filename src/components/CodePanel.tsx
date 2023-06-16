@@ -41,7 +41,7 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
       setAssembled({});
       setIsAssembling(true);
 
-      const sth = () => {
+      const main = () => {
         microProgramMemory.instructions = microProgram;
 
         microProgramMemory.load();
@@ -55,14 +55,14 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
       };
 
       if (!withTimeout) {
-        sth();
+        main();
         setIsAssembling(false);
         return;
       }
 
       setTimeout(() => {
         try {
-          sth();
+          main();
 
           toast("Assembled successfully!", {
             type: "success",
@@ -99,7 +99,7 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
   }, [handleAssembling, restart, setRestart]);
 
   return (
-    <div className={`flex flex-col gap-5 px-14 ${className}`}>
+    <div className={`flex flex-col gap-5 px-6 md:px-14 ${className}`}>
       <Editor
         name="micro-program-editor"
         title="Micro Program Memory"

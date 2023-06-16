@@ -7,7 +7,7 @@ interface BarProps {
 const Bar: React.FC<BarProps> = ({ className }) => {
   return (
     <div
-      className={`w-full bg-green-500 text-gray-700 text-center py-3 ${className}`}
+      className={`w-full bg-green-500 px-4 py-3 text-center text-[.68rem] text-gray-700 md:text-base ${className}`}
     >
       <p className="font-semibold">
         <span>Mano Micro Program Computer Simulator</span> By{" "}

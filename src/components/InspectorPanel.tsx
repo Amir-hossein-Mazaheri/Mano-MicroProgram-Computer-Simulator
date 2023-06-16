@@ -7,12 +7,14 @@ import { useAssembler } from "../store/useAssembler";
 import { Memory } from "../core/Memory";
 import ActionsPanel from "./ActionsPanel";
 import { SignalContext } from "../context/SignalContext";
+import infoIllustration from "../assets/info.svg";
 
 interface MemoryInspectorProps {
   className?: string;
 }
 
 const tableRow = "text-sm w-[20%] text-left py-4 px-6";
+const desktopRow = " md:block hidden";
 
 /**
  * This component shows current memory also ActionsPanel and ErrorPanel and
@@ -55,25 +57,33 @@ const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
 
   useEffect(() => {
     signalContext.signal.memoryWrite = (arr) => {
-      setWritingLine(parseInt(arr, 2));
+      const index = parseInt(arr, 2);
+      setWritingLine(index);
+      scrollToIndex(index);
 
       setTimeout(() => setWritingLine(-1), 300);
     };
 
     signalContext.signal.memoryRead = (arr) => {
-      setReadingLine(parseInt(arr, 2));
+      const index = parseInt(arr, 2);
+      setReadingLine(index);
+      scrollToIndex(index);
 
       setTimeout(() => setReadingLine(-1), 300);
     };
-  }, [signalContext.signal]);
+  }, [scrollToIndex, signalContext.signal]);
 
   if (!Object.keys(assembled).length || isAssembling) {
     return (
       <div className={`px-6 py-2 ${className}`}>
-        <div className="rounded-lg bg-sky-500 px-12 py-8 text-center">
-          <p className="font-semibold">
+        <div className="rounded-xl border border-green-700 px-12 py-8 text-center">
+          <div className="flex items-center justify-center">
+            <img src={infoIllustration} alt="info-illustration" />
+          </div>
+
+          <p className="mt-12 font-semibold">
             You haven't assembled your code yet. Click on the{" "}
-            <strong className="text-black">Assemble</strong> button
+            <strong className="text-green-500">Assemble</strong> button
           </p>
         </div>
 
@@ -89,8 +99,8 @@ const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
           <div className="w-full table-auto border-collapse bg-gray-800">
             <div className="sticky top-0 z-10 flex bg-gray-900">
               <div className={tableRow}>Number</div>
-              <div className={tableRow}>Line Label</div>
-              <div className={tableRow}>Instruction</div>
+              <div className={`${tableRow} ${desktopRow}`}>Line Label</div>
+              <div className={`${tableRow} ${desktopRow}`}>Instruction</div>
               <div className={tableRow}>Binary</div>
             </div>
             {memory.size > 0 && (
@@ -132,10 +142,10 @@ const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
                         <div className={tableRow}>
                           {memory.content[index].ln}
                         </div>
-                        <div className={tableRow}>
+                        <div className={`${tableRow} ${desktopRow}`}>
                           {memory.content[index].label}
                         </div>
-                        <div className={tableRow}>
+                        <div className={`${tableRow} ${desktopRow}`}>
                           {memory.content[index].instruction}
                         </div>
                         <div className={`font-mono text-base ${tableRow}`}>
