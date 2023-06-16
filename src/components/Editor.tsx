@@ -31,7 +31,7 @@ const Editor: React.FC<EditorProps> = ({
     if (containerRef.current) {
       setHeight(containerRef.current.clientHeight);
 
-      containerRef.current.addEventListener("resize", () => {
+      window.addEventListener("resize", () => {
         if (containerRef.current) {
           setHeight(containerRef.current.clientHeight);
         }
@@ -79,8 +79,8 @@ const Editor: React.FC<EditorProps> = ({
           className="absolute top-0 z-10 flex flex-col overflow-hidden bg-gray-600/40 px-4 py-3 text-right leading-loose"
         >
           <div>
-            {value.split("\n").map((_, i) => (
-              <p>{i + 1}</p>
+            {value.split("\n").map((v, i) => (
+              <p key={v}>{i + 1}</p>
             ))}
           </div>
         </div>
@@ -88,7 +88,7 @@ const Editor: React.FC<EditorProps> = ({
         <textarea
           ref={textAreaRef}
           name={name}
-          className={`absolute left-0 top-0 z-[1] w-full resize-none overflow-auto whitespace-nowrap rounded-b-xl bg-transparent px-14 py-3 font-light leading-loose text-transparent caret-white outline-none `}
+          className={`absolute left-0 top-0 z-[1] w-full resize-none overflow-auto whitespace-nowrap rounded-b-xl bg-transparent px-16 py-3 font-light leading-loose text-transparent caret-white outline-none `}
           onInput={handleChange}
           onScroll={handleScroll}
           spellCheck={false}
@@ -100,7 +100,7 @@ const Editor: React.FC<EditorProps> = ({
           aria-hidden
           ref={preRef}
           style={{ height }}
-          className="absolute top-0 z-0 w-full overflow-auto whitespace-nowrap rounded-b-xl bg-gray-700/50 px-14 py-3 font-light leading-loose"
+          className="absolute top-0 z-0 w-full overflow-auto whitespace-nowrap rounded-b-xl bg-gray-700/50 px-16 py-3 font-light leading-loose"
         >
           <code
             className="leading-loose"
