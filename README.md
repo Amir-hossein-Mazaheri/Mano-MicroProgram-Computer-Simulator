@@ -6,7 +6,7 @@ This is a simulator for computer with power of micro program introduced in Moris
 
 A simple preview of running project:
 
-![preview](https://raw.githubusercontent.com/Amir-hossein-Mazaheri/Mano-MicroProgram-Computer-Simulator/main/preview.png?token=GHSAT0AAAAAACC5OY2FMS3ZZ4GQL3JI25HWZELNGXA)
+![preview](https://github.com/Amir-hossein-Mazaheri/Mano-MicroProgram-Computer-Simulator/blob/main/preview.png)
 
 ## Features
 
