@@ -12,16 +12,16 @@ export class Signal {
     //
   };
   private _memoryWrite = (arr: string) => {
-    //
+    arr;
   };
   private _memoryRead = (arr: string) => {
-    //
+    arr;
   };
   private _registerWrite = (register: Register) => {
-    //
+    register;
   };
   private _registerRead = (register: Register) => {
-    //
+    register;
   };
   private _step = () => {
     //
