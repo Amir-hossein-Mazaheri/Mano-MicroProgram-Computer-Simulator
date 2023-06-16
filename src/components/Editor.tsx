@@ -79,8 +79,8 @@ const Editor: React.FC<EditorProps> = ({
           className="absolute top-0 z-10 flex flex-col overflow-hidden bg-gray-600/40 px-4 py-3 text-right leading-loose"
         >
           <div>
-            {value.split("\n").map((v, i) => (
-              <p key={v}>{i + 1}</p>
+            {value.split("\n").map((_, i) => (
+              <p key={i}>{i + 1}</p>
             ))}
           </div>
         </div>
