@@ -50,16 +50,16 @@ const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
   }, [memory, setMemory]);
 
   useEffect(() => {
-    if (memory.end === -1) return;
+    if (memory.start === -1) return;
 
-    scrollToIndex(memory.end);
-  }, [memory.end, scrollToIndex]);
+    scrollToIndex(memory.start, { align: "start" });
+  }, [memory.start, scrollToIndex]);
 
   useEffect(() => {
     signalContext.signal.memoryWrite = (arr) => {
       const index = parseInt(arr, 2);
       setWritingLine(index);
-      scrollToIndex(index);
+      scrollToIndex(index, { align: "center" });
 
       setTimeout(() => setWritingLine(-1), 300);
     };
@@ -67,7 +67,7 @@ const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
     signalContext.signal.memoryRead = (arr) => {
       const index = parseInt(arr, 2);
       setReadingLine(index);
-      scrollToIndex(index);
+      scrollToIndex(index, { align: "center" });
 
       setTimeout(() => setReadingLine(-1), 300);
     };
