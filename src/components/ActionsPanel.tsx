@@ -13,7 +13,7 @@ interface ActionsPanelProps {
 }
 
 /**
- * This component shows current registers and lets user to interact with through
+ * This component shows current registers and lets user to interact with computer simulator through
  * three main action such as "Next Micro Operation", "Next Step" and "Fully Execute"
  * which are handled by the CPU class
  */
@@ -23,7 +23,7 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({ className }) => {
 
   const signalContext = useContext(SignalContext);
 
-  const { microProgramMemory, memory, setError } = useAssembler(
+  const { microProgramMemory, memory, setError, setRestart } = useAssembler(
     (store) => store,
     shallow
   );
@@ -59,13 +59,13 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({ className }) => {
 
   return (
     <div className={`${className}`}>
-      <div className="mb-12 mt-5 flex flex-wrap gap-6 rounded-xl px-6 py-4 outline outline-[1px]">
+      <div className="mb-12 mt-5 grid grid-cols-3 gap-6 rounded-xl px-6 py-4 outline outline-[1px]">
         {registers.map((r) => (
           <p
             key={r}
-            className={`basis-[calc(33.33% - 1.5rem)] grow ${
-              r === readingRegister && "text-sky-500"
-            } ${r === writingRegister && "text-red-500"}`}
+            className={`${r === readingRegister && "text-sky-500"} ${
+              r === writingRegister && "text-red-500"
+            }`}
           >
             <span>{r}: </span>
             <span>{cpu[r]}</span>
@@ -84,6 +84,12 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({ className }) => {
 
         <Button outline className="grow" onClick={handleAction("execute")}>
           Fully Execute
+        </Button>
+      </div>
+
+      <div className="mt-5">
+        <Button outline className="w-full" onClick={() => setRestart(true)}>
+          Restart
         </Button>
       </div>
     </div>

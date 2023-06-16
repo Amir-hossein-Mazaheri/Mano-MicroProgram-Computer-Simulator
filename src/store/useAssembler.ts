@@ -12,6 +12,7 @@ interface InitialState {
   assembled: Record<number, AssemblyLine>;
   microProgramMemory: MicroProgramMemory;
   memory: Memory;
+  restart: boolean;
 }
 
 interface UseAssembler extends InitialState {
@@ -20,6 +21,7 @@ interface UseAssembler extends InitialState {
   setWarns: (warns: string[]) => void;
   setAssembled: (assembled: Record<number, AssemblyLine>) => void;
   setMemory: (memory: Memory) => void;
+  setRestart: (restart: boolean) => void;
 }
 
 const initialState: InitialState = {
@@ -29,6 +31,7 @@ const initialState: InitialState = {
   assembled: {},
   microProgramMemory: MicroProgramMemory.create(),
   memory: new Memory({}),
+  restart: false,
 };
 
 export const useAssembler = create(
@@ -62,6 +65,12 @@ export const useAssembler = create(
     setMemory(memory) {
       set((state) => {
         state.memory = memory;
+      });
+    },
+
+    setRestart(restart) {
+      set((state) => {
+        state.restart = restart;
       });
     },
   }))

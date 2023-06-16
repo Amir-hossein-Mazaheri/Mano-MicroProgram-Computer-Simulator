@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { shallow } from "zustand/shallow";
 import { toast } from "react-toastify";
 
@@ -26,20 +26,22 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
   const {
     isAssembling,
     microProgramMemory,
+    restart,
     setAssembled,
     setIsAssembling,
     setError,
     setWarns,
+    setRestart,
   } = useAssembler((store) => store, shallow);
 
-  const handleAssembling = () => {
-    setError("");
-    setWarns([]);
-    setAssembled({});
-    setIsAssembling(true);
+  const handleAssembling = useCallback(
+    (withTimeout = true) => {
+      setError("");
+      setWarns([]);
+      setAssembled({});
+      setIsAssembling(true);
 
-    setTimeout(() => {
-      try {
+      const sth = () => {
         microProgramMemory.instructions = microProgram;
 
         microProgramMemory.load();
@@ -50,23 +52,51 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
 
         setWarns(warns);
         setAssembled(assembled);
+      };
 
-        toast("Assembled successfully!", {
-          type: "success",
-        });
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        }
-
-        toast("An error occurred while trying to assemble your code", {
-          type: "error",
-        });
+      if (!withTimeout) {
+        sth();
+        setIsAssembling(false);
+        return;
       }
 
-      setIsAssembling(false);
-    }, 1000);
-  };
+      setTimeout(() => {
+        try {
+          sth();
+
+          toast("Assembled successfully!", {
+            type: "success",
+          });
+        } catch (err) {
+          if (err instanceof Error) {
+            setError(err.message);
+          }
+
+          toast("An error occurred while trying to assemble your code", {
+            type: "error",
+          });
+        }
+
+        setIsAssembling(false);
+      }, 1000);
+    },
+    [
+      assembly,
+      microProgram,
+      microProgramMemory,
+      setAssembled,
+      setError,
+      setIsAssembling,
+      setWarns,
+    ]
+  );
+
+  useEffect(() => {
+    if (restart) {
+      setRestart(false);
+      handleAssembling(false);
+    }
+  }, [handleAssembling, restart, setRestart]);
 
   return (
     <div className={`flex flex-col gap-5 px-14 ${className}`}>
