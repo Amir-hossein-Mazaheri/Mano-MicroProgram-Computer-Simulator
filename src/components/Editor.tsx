@@ -10,7 +10,7 @@ interface EditorProps {
 }
 
 /**
- * Super simple and nice editor with syntax highlighting support
+ * Super editor like with syntax highlighting and line counter support
  */
 const Editor: React.FC<EditorProps> = ({
   title,
@@ -25,12 +25,25 @@ const Editor: React.FC<EditorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const lineCounterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setHeight(containerRef.current.clientHeight);
+
+      containerRef.current.addEventListener("resize", () => {
+        if (containerRef.current) {
+          setHeight(containerRef.current.clientHeight);
+        }
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (containerRef.current) {
       setHeight(containerRef.current.clientHeight);
     }
-  }, []);
+  }, [containerRef.current?.clientHeight]);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
@@ -39,9 +52,12 @@ const Editor: React.FC<EditorProps> = ({
   };
 
   const handleScroll = () => {
-    if (preRef.current && textAreaRef.current) {
+    if (preRef.current && textAreaRef.current && lineCounterRef.current) {
       preRef.current.scrollTop = textAreaRef.current.scrollTop;
       preRef.current.scrollLeft = textAreaRef.current.scrollLeft;
+
+      lineCounterRef.current.scrollTop = preRef.current.scrollTop;
+      lineCounterRef.current.scrollLeft = preRef.current.scrollLeft;
     }
   };
 
@@ -54,11 +70,25 @@ const Editor: React.FC<EditorProps> = ({
         {title}
       </h3>
 
-      <div className="relative py-24">
+      <div className="relative py-16">
+        <div
+          ref={lineCounterRef}
+          style={{
+            height: height,
+          }}
+          className="absolute top-0 z-10 flex flex-col overflow-hidden bg-gray-600/40 px-4 py-3 text-right leading-loose"
+        >
+          <div>
+            {value.split("\n").map((_, i) => (
+              <p>{i + 1}</p>
+            ))}
+          </div>
+        </div>
+
         <textarea
           ref={textAreaRef}
           name={name}
-          className={`absolute left-0 top-0 z-[1] w-full resize-none overflow-auto whitespace-nowrap rounded-b-xl bg-transparent px-6 py-4 font-light leading-loose text-transparent caret-white outline-none `}
+          className={`absolute left-0 top-0 z-[1] w-full resize-none overflow-auto whitespace-nowrap rounded-b-xl bg-transparent px-14 py-3 font-light leading-loose text-transparent caret-white outline-none `}
           onInput={handleChange}
           onScroll={handleScroll}
           spellCheck={false}
@@ -70,7 +100,7 @@ const Editor: React.FC<EditorProps> = ({
           aria-hidden
           ref={preRef}
           style={{ height }}
-          className="absolute top-0 z-0 w-full overflow-auto whitespace-nowrap rounded-b-xl bg-gray-700/50 px-6 py-4 font-light leading-loose"
+          className="absolute top-0 z-0 w-full overflow-auto whitespace-nowrap rounded-b-xl bg-gray-700/50 px-14 py-3 font-light leading-loose"
         >
           <code
             className="leading-loose"
