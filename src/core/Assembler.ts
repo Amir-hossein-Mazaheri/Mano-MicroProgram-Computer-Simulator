@@ -91,6 +91,7 @@ export class Assembler {
       }
 
       const [instruction, operand, indirect] = withLabel[0].trim().split(" ");
+      const trueOperand = operand ?? "00000000000";
 
       if (instruction === "ORG") {
         lineCounter = +operand;
@@ -148,7 +149,7 @@ export class Assembler {
               label,
               lineCounter,
               instruction,
-              operand,
+              trueOperand,
               !!indirect,
               oppCode,
               false
