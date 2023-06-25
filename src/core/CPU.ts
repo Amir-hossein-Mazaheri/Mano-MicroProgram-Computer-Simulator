@@ -36,6 +36,8 @@ export class CPU {
   private _DR_SNAPSHOT = this._DR.clone();
   private _AC_SNAPSHOT = this._AC;
 
+  private _AC_WRITE = false;
+
   private _lastMicroOperation: "F1" | "F2" | "F3" = "F3";
 
   constructor(
@@ -46,16 +48,34 @@ export class CPU {
       this._PC = _memory.start.toString(2).padStart(11, "0");
   }
 
-  // This method takes a snapshot of registers before executing any thing
-  // Having this method is a must because we just simulating the microprogram computer
+  // This method takes a snapshot of registers before executing any thing.
+  // Having this method is a must because we are just simulating the microprogram computer
   // which runs each microprogram line in just ONE CLOCK and it happens instantly
-  // but in out simulator the get executed ONE BY ONE which make it different
-  // from the original computer so snapshots helps to fix this issue
+  // but in our simulator each micro operation the get executed ONE BY ONE which makes it different
+  // from the original computer so snapshots helps to fix this issue.
+  // All of micro operation uses the snap version of registers which is the
+  // version of registers before applying any change so this solve our issue and
+  // simulation is just like the real micro program computer :)
   private takeSnapshot() {
     this._AR_SNAPSHOT = this._AR;
     this._PC_SNAPSHOT = this._PC;
     this._DR_SNAPSHOT = this._DR.clone();
     this._AC_SNAPSHOT = this._AC;
+  }
+
+  // This methods help with stopping user from accessing AC register more than
+  // once in a single step
+  // we only need to lock AC register because the nature of F1, F2, and F3 stops
+  // user from accessing other registers at the same time the only problem they cause
+  // is writing AC at the same step
+  private lockAC() {
+    if (this._AC_WRITE) {
+      throw new Error(
+        "You simulator just broke ;( because you used two incompatible micro operation at the same line."
+      );
+    }
+
+    this._AC_WRITE = true;
   }
 
   micro() {
@@ -96,6 +116,7 @@ export class CPU {
     if (this._DR.instruction === "HLT") return false;
 
     this.takeSnapshot();
+    this._AC_WRITE = false;
 
     const car = this._microProgramMemory.CAR;
     const content = this._microProgramMemory.read(car);
@@ -150,6 +171,8 @@ export class CPU {
 
   // START F1
   private ADD() {
+    this.lockAC();
+
     this._AC = toBin(
       toDecimal(this._AC_SNAPSHOT) + toDecimal(this._DR_SNAPSHOT.binary),
       16
@@ -161,18 +184,24 @@ export class CPU {
   }
 
   private CLRAC() {
+    this.lockAC();
+
     this._AC = "0000000000000000";
 
     this._signal.registerWrite("AC");
   }
 
   private INCAC() {
+    this.lockAC();
+
     this._AC = incBinary(this._AC_SNAPSHOT);
 
     this._signal.registerWrite("AC");
   }
 
   private DRTAC() {
+    this.lockAC();
+
     this._AC = this._DR_SNAPSHOT.binary;
 
     this._signal.registerWrite("AC");
@@ -199,6 +228,8 @@ export class CPU {
 
   // START F2
   private SUB() {
+    this.lockAC();
+
     this._AC = toBin(
       toDecimal(this._AC_SNAPSHOT) - toDecimal(this._DR_SNAPSHOT.binary),
       16
@@ -210,6 +241,8 @@ export class CPU {
   }
 
   private OR() {
+    this.lockAC();
+
     this._AC = binOperation(this._AC_SNAPSHOT, this._DR_SNAPSHOT.binary, "OR");
 
     this._signal.registerRead("AC");
@@ -218,6 +251,8 @@ export class CPU {
   }
 
   private AND() {
+    this.lockAC();
+
     this._AC = binOperation(this._AC_SNAPSHOT, this._DR_SNAPSHOT.binary, "AND");
 
     this._signal.registerRead("AC");
@@ -253,6 +288,8 @@ export class CPU {
 
   // START F3
   private XOR() {
+    this.lockAC();
+
     this._AC = binOperation(this._AC_SNAPSHOT, this._DR_SNAPSHOT.binary, "XOR");
 
     this._signal.registerRead("AC");
@@ -261,12 +298,16 @@ export class CPU {
   }
 
   private COM() {
+    this.lockAC();
+
     this._AC = binOperation(this._AC_SNAPSHOT, "", "COM");
 
     this._signal.registerWrite("AC");
   }
 
   private SHL() {
+    this.lockAC();
+
     const ac = this._AC_SNAPSHOT.split("");
 
     ac.pop();
@@ -278,6 +319,8 @@ export class CPU {
   }
 
   private SHR() {
+    this.lockAC();
+
     const ac = this._AC_SNAPSHOT.split("");
 
     ac.shift();
