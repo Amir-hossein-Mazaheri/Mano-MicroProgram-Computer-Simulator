@@ -31,6 +31,11 @@ export class CPU {
   ); //16bit number or instruction
   private _AC = "0000000000000000"; //16bit number
 
+  private _AR_SNAPSHOT = this._AR;
+  private _PC_SNAPSHOT = this._PC;
+  private _DR_SNAPSHOT = this._DR.clone();
+  private _AC_SNAPSHOT = this._AC;
+
   private _lastMicroOperation: "F1" | "F2" | "F3" = "F3";
 
   constructor(
@@ -39,6 +44,18 @@ export class CPU {
   ) {
     if (_memory.start !== -1)
       this._PC = _memory.start.toString(2).padStart(11, "0");
+  }
+
+  // This method takes a snapshot of registers before executing any thing
+  // Having this method is a must because we just simulating the microprogram computer
+  // which runs each microprogram line in just ONE CLOCK and it happens instantly
+  // but in out simulator the get executed ONE BY ONE which make it different
+  // from the original computer so snapshots helps to fix this issue
+  private takeSnapshot() {
+    this._AR_SNAPSHOT = this._AR;
+    this._PC_SNAPSHOT = this._PC;
+    this._DR_SNAPSHOT = this._DR.clone();
+    this._AC_SNAPSHOT = this._AC;
   }
 
   micro() {
@@ -77,6 +94,8 @@ export class CPU {
 
   step() {
     if (this._DR.instruction === "HLT") return false;
+
+    this.takeSnapshot();
 
     const car = this._microProgramMemory.CAR;
     const content = this._microProgramMemory.read(car);
@@ -131,7 +150,10 @@ export class CPU {
 
   // START F1
   private ADD() {
-    this._AC = toBin(toDecimal(this._AC) + toDecimal(this._DR.binary), 16);
+    this._AC = toBin(
+      toDecimal(this._AC_SNAPSHOT) + toDecimal(this._DR_SNAPSHOT.binary),
+      16
+    );
 
     this._signal.registerRead("AC");
     this._signal.registerWrite("AC");
@@ -145,39 +167,42 @@ export class CPU {
   }
 
   private INCAC() {
-    this._AC = incBinary(this._AC);
+    this._AC = incBinary(this._AC_SNAPSHOT);
 
     this._signal.registerWrite("AC");
   }
 
   private DRTAC() {
-    this._AC = this._DR.binary;
+    this._AC = this._DR_SNAPSHOT.binary;
 
     this._signal.registerWrite("AC");
     this._signal.registerRead("DR");
   }
 
   private DRTAR() {
-    this._AR = this._DR.operand;
+    this._AR = this._DR_SNAPSHOT.operand;
 
     this._signal.registerWrite("AR");
     this._signal.registerRead("DR");
   }
 
   private PCTAR() {
-    this._AR = this._PC;
+    this._AR = this._PC_SNAPSHOT;
 
     this._signal.registerWrite("AR");
     this._signal.registerRead("PC");
   }
 
   private WRITE() {
-    this._memory.write(this._AR, this._DR);
+    this._memory.write(this._AR_SNAPSHOT, this._DR_SNAPSHOT);
   }
 
   // START F2
   private SUB() {
-    this._AC = toBin(toDecimal(this._AC) - toDecimal(this._DR.binary), 16);
+    this._AC = toBin(
+      toDecimal(this._AC_SNAPSHOT) - toDecimal(this._DR_SNAPSHOT.binary),
+      16
+    );
 
     this._signal.registerRead("AC");
     this._signal.registerWrite("AC");
@@ -185,7 +210,7 @@ export class CPU {
   }
 
   private OR() {
-    this._AC = binOperation(this._AC, this._DR.binary, "OR");
+    this._AC = binOperation(this._AC_SNAPSHOT, this._DR_SNAPSHOT.binary, "OR");
 
     this._signal.registerRead("AC");
     this._signal.registerWrite("AC");
@@ -193,7 +218,7 @@ export class CPU {
   }
 
   private AND() {
-    this._AC = binOperation(this._AC, this._DR.binary, "AND");
+    this._AC = binOperation(this._AC_SNAPSHOT, this._DR_SNAPSHOT.binary, "AND");
 
     this._signal.registerRead("AC");
     this._signal.registerWrite("AC");
@@ -201,26 +226,26 @@ export class CPU {
   }
 
   private READ() {
-    this._DR = this._memory.read(this._AR);
+    this._DR = this._memory.read(this._AR_SNAPSHOT);
 
     this._signal.registerWrite("DR");
   }
 
   private ACTDR() {
-    this._DR.oppCode = this._AC;
+    this._DR.oppCode = this._AC_SNAPSHOT;
 
     this._signal.registerWrite("AC");
     this._signal.registerRead("DR");
   }
 
   private INCDR() {
-    this._DR.oppCode = incBinary(this._DR.oppCode);
+    this._DR.oppCode = incBinary(this._DR_SNAPSHOT.oppCode);
 
     this._signal.registerWrite("DR");
   }
 
   private PCTDR() {
-    this._DR.operand = this._PC;
+    this._DR.operand = this._PC_SNAPSHOT;
 
     this._signal.registerRead("PC");
     this._signal.registerWrite("DR");
@@ -228,7 +253,7 @@ export class CPU {
 
   // START F3
   private XOR() {
-    this._AC = binOperation(this._AC, this._DR.binary, "XOR");
+    this._AC = binOperation(this._AC_SNAPSHOT, this._DR_SNAPSHOT.binary, "XOR");
 
     this._signal.registerRead("AC");
     this._signal.registerRead("DR");
@@ -236,13 +261,13 @@ export class CPU {
   }
 
   private COM() {
-    this._AC = binOperation(this._AC, "", "COM");
+    this._AC = binOperation(this._AC_SNAPSHOT, "", "COM");
 
     this._signal.registerWrite("AC");
   }
 
   private SHL() {
-    const ac = this._AC.split("");
+    const ac = this._AC_SNAPSHOT.split("");
 
     ac.pop();
     ac.push("0");
@@ -253,7 +278,7 @@ export class CPU {
   }
 
   private SHR() {
-    const ac = this._AC.split("");
+    const ac = this._AC_SNAPSHOT.split("");
 
     ac.shift();
     ac.unshift("0");
@@ -264,13 +289,13 @@ export class CPU {
   }
 
   private INCPC() {
-    this._PC = incBinary(this._PC);
+    this._PC = incBinary(this._PC_SNAPSHOT);
 
     this._signal.registerWrite("PC");
   }
 
   private ARTPC() {
-    this._PC = this._AR;
+    this._PC = this._AR_SNAPSHOT;
 
     this._signal.registerWrite("AR");
     this._signal.registerWrite("PC");

@@ -96,4 +96,18 @@ export class AssemblyLine {
   isEmpty() {
     return !this._instruction;
   }
+
+  // just a simple way to clone the whole class instance
+  clone() {
+    return new AssemblyLine(
+      this._label,
+      this._ln,
+      this._instruction,
+      this._operand,
+      this._indirect,
+      this._oppCode,
+      this._ioRef,
+      this._isNumber
+    );
+  }
 }
