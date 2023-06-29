@@ -23,7 +23,7 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({ className }) => {
 
   const signalContext = useContext(SignalContext);
 
-  const { microProgramMemory, memory, setError, setRestart } = useAssembler(
+  const { microProgramMemory, memory, restart, setError } = useAssembler(
     (store) => store,
     shallow
   );
@@ -137,7 +137,7 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({ className }) => {
         <Button
           outline
           className="flex w-full items-center justify-center gap-3 fill-green-500"
-          onClick={() => setRestart(true)}
+          onClick={restart}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

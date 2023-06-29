@@ -15,7 +15,7 @@ interface InitialState {
   assembled: Record<number, AssemblyLine>;
   microProgramMemory: MicroProgramMemory;
   memory: Memory;
-  restart: boolean;
+  restart: () => void;
   showCodePanel: boolean;
 }
 
@@ -27,7 +27,7 @@ interface UseAssembler extends InitialState {
   setWarns: (warns: string[]) => void;
   setAssembled: (assembled: Record<number, AssemblyLine>) => void;
   setMemory: (memory: Memory) => void;
-  setRestart: (restart: boolean) => void;
+  setRestart: (restart: () => void) => void;
   toggleShowCodePanel: () => void;
 }
 
@@ -40,7 +40,7 @@ const initialState: InitialState = {
   assembled: {},
   microProgramMemory: MicroProgramMemory.create(),
   memory: new Memory({}),
-  restart: false,
+  restart: () => ({}),
   showCodePanel: true,
 };
 

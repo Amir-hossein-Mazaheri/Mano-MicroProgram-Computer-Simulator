@@ -156,8 +156,6 @@ export class SyntaxHighlighter {
         (i) => !!i.trim()
       );
 
-      console.log(operation, operand, indirect);
-
       let whiteSpace = "";
 
       for (let j = 0; j < withInstruction.length; j++) {

@@ -96,11 +96,10 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
   );
 
   useEffect(() => {
-    if (restart) {
-      setRestart(false);
-      handleAssembling(false);
-    }
-  }, [handleAssembling, restart, setRestart]);
+    setRestart(() => handleAssembling(false));
+  }, [handleAssembling, setRestart]);
+
+  console.log("restart: ", restart);
 
   return (
     <div className={`flex flex-col gap-5 px-6 md:px-14 ${className}`}>
