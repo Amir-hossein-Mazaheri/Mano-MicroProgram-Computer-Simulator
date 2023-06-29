@@ -42,8 +42,10 @@ BUN: NOP     I    CALL  INDRCT
 
 
          ORG 32
-MUL: NOP      I  CALL  INDRCT
-LOP: CLRAC  U JMP   NEXT 
-        INCAC  U JMP   NEXT
+FAC: NOP       I    CALL INDRCT
+         READ     U  JMP   NEXT
+         DRTAR   U  JMP   NEXT
+         READ     U  JMP   NEXT
+         DRTAC  U  JMP   FETCH
 
 

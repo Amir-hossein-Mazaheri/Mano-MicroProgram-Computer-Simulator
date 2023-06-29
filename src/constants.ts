@@ -57,3 +57,12 @@ export const ioRef = [
 ] as const;
 
 export const registers = ["AR", "PC", "DR", "AC"] as const;
+
+export const FAC0 = "0000000000000001";
+export const FAC1 = "0000000000000001";
+export const FAC2 = "0000000000000010";
+export const FAC3 = "0000000000000110";
+export const FAC4 = "0000000000011000";
+export const FAC5 = "0000000001111000";
+export const FAC6 = "0000001011010000";
+export const FAC7 = "0001001110110000";
