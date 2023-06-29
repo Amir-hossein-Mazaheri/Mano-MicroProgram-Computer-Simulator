@@ -1,5 +1,6 @@
 import { F1, F2, F3, CD, BR } from "../constants";
 import { MicroProgramLine } from "./MicroProgramLine";
+import { Signal } from "./Signal";
 
 /**
  * Representation of Micro Program Memory with access to "CAR" and "SBR" registers
@@ -7,6 +8,8 @@ import { MicroProgramLine } from "./MicroProgramLine";
  */
 export class MicroProgramMemory {
   private static _instance: MicroProgramMemory;
+  private _arrContent: [string, MicroProgramLine][] = [];
+  private _signal = Signal.create();
   private _SBR = "0000000";
   private _CAR = "0000000";
   private _instructions = "";
@@ -60,6 +63,16 @@ export class MicroProgramMemory {
 
   get content() {
     return this._content;
+  }
+
+  get arrContent() {
+    if (this._arrContent.length > 1) return this._arrContent;
+
+    const arr = Object.entries(this._content);
+
+    this._arrContent = arr;
+
+    return arr;
   }
 
   getName(oppCode: string) {
@@ -194,11 +207,11 @@ export class MicroProgramMemory {
         }
       }
     }
-
-    console.log("microprogram loaded content: ", this._CAR, this._content);
   }
 
   read(arr: string) {
+    this._signal.microProgramRead(arr);
+
     return this._content[parseInt(arr, 2)];
   }
 }

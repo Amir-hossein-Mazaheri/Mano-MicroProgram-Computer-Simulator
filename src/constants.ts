@@ -56,7 +56,7 @@ export const ioRef = [
   { code: "HLT", binary: "0111000000000001" },
 ] as const;
 
-export const registers = ["AR", "PC", "DR", "AC"] as const;
+export const registers = ["AR", "PC", "DR", "AC", "CAR", "SBR"] as const;
 
 export const FAC0 = "0000000000000001";
 export const FAC1 = "0000000000000001";

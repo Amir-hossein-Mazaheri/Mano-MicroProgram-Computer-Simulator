@@ -17,6 +17,9 @@ export class Signal {
   private _memoryRead = (arr: string) => {
     arr;
   };
+  private _microProgramRead = (arr: string) => {
+    arr;
+  };
   private _registerWrite = (register: Register) => {
     register;
   };
@@ -64,6 +67,14 @@ export class Signal {
 
   set memoryRead(memoryRead: (arr: string) => void) {
     this._memoryRead = memoryRead;
+  }
+
+  set microProgramRead(microProgramRead: (arr: string) => void) {
+    this._microProgramRead = microProgramRead;
+  }
+
+  get microProgramRead() {
+    return this._microProgramRead;
   }
 
   get registerWrite() {

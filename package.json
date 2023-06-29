@@ -1,5 +1,7 @@
 {
   "name": "microprogram",
+  "authors": "Amirhossein Mazaheri",
+  "description": "This is a simulator for computer with power of micro program introduced in Morris Mano book",
   "main": "main.ts",
   "private": true,
   "version": "0.0.0",

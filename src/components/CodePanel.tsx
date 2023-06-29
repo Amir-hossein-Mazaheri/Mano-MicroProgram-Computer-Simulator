@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { shallow } from "zustand/shallow";
 import { toast } from "react-toastify";
 
@@ -7,7 +7,6 @@ import { SyntaxHighlighter } from "../core/SyntaxHighlighter";
 import Button from "./Button";
 import { useAssembler } from "../store/useAssembler";
 import { Assembler } from "../core/Assembler";
-import { getBMPM } from "../utils/getBMPM";
 
 interface PanelProps {
   className?: string;
@@ -20,18 +19,21 @@ const syntaxHighlighter = new SyntaxHighlighter("MicroProgram");
  * through a nice and pretty syntax highlighted editor also it lets user to assemble the code
  */
 const CodePanel: React.FC<PanelProps> = ({ className }) => {
-  const [assembly, setAssembly] = useState("");
-  const [microProgram, setMicroProgram] = useState(getBMPM());
-
   const {
+    assembly,
+    microProgram,
+    assembled,
     isAssembling,
     microProgramMemory,
     restart,
+    setAssembly,
+    setMicroProgram,
     setAssembled,
     setIsAssembling,
     setError,
     setWarns,
     setRestart,
+    toggleShowCodePanel,
   } = useAssembler((store) => store, shallow);
 
   const handleAssembling = useCallback(
@@ -63,6 +65,7 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
       setTimeout(() => {
         try {
           main();
+          toggleShowCodePanel();
 
           toast("Assembled successfully!", {
             type: "success",
@@ -88,6 +91,7 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
       setError,
       setIsAssembling,
       setWarns,
+      toggleShowCodePanel,
     ]
   );
 
@@ -116,6 +120,24 @@ const CodePanel: React.FC<PanelProps> = ({ className }) => {
         onChange={setAssembly}
         className="flex-[3]"
       />
+
+      {Object.keys(assembled).length > 0 && (
+        <div className="w-full">
+          <Button
+            className="flex w-full items-center justify-center gap-3 bg-red-500 fill-white"
+            onClick={() => toggleShowCodePanel()}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="1em"
+              viewBox="0 0 448 512"
+            >
+              <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z" />
+            </svg>
+            <span>Back To Micro Program Inspector</span>
+          </Button>
+        </div>
+      )}
 
       <Button
         className="flex items-center justify-center gap-3 fill-white"

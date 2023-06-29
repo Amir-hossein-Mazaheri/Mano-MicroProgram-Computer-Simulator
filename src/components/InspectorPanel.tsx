@@ -94,6 +94,10 @@ const InspectorPanel: React.FC<MemoryInspectorProps> = ({ className }) => {
 
   return (
     <div className={`flex flex-col gap-5 px-8 ${className}`}>
+      <div className="font-xl mb-5 w-full rounded-xl border border-sky-500 px-6 py-3 text-center font-semibold text-sky-500">
+        <h2>Memory Inspector</h2>
+      </div>
+
       <div className="overflow-hidden rounded-xl">
         <div className="">
           <div className="w-full table-auto border-collapse bg-gray-800">

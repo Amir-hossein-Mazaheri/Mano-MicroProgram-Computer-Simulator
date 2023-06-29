@@ -168,6 +168,14 @@ export class CPU {
     return this._DR?.binary;
   }
 
+  get CAR() {
+    return this._microProgramMemory.CAR;
+  }
+
+  get SBR() {
+    return this._microProgramMemory.SBR;
+  }
+
   private NOP() {
     //
   }
@@ -371,19 +379,31 @@ export class CPU {
 
   private JMP(car: string) {
     this._microProgramMemory.CAR = this._microProgramMemory.read(car).ADDR;
+
+    this._signal.registerWrite("CAR");
   }
 
   private CALL(car: string) {
     this._microProgramMemory.SBR = incBinary(this._microProgramMemory.CAR);
     this._microProgramMemory.CAR = this._microProgramMemory.read(car).ADDR;
+
+    this._signal.registerRead("CAR");
+    this._signal.registerWrite("SBR");
+    this._signal.registerWrite("CAR");
   }
 
   private RET() {
     this._microProgramMemory.CAR = this._microProgramMemory.SBR;
+
+    this._signal.registerRead("SBR");
+    this._signal.registerWrite("CAR");
   }
 
   private MAP() {
     this._AR = this._DR.operand;
     this._microProgramMemory.CAR = `0${this._DR.oppCode}00`;
+
+    this._signal.registerWrite("AR");
+    this._signal.registerRead("CAR");
   }
 }

@@ -78,4 +78,8 @@ export class MicroProgramLine {
       this.ADDR
     );
   }
+
+  isEmpty() {
+    return this.binary === "00000000000000000000";
+  }
 }
