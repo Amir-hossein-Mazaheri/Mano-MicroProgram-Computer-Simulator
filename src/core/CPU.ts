@@ -105,6 +105,9 @@ export class CPU {
 
         break;
       case "F3":
+        this.takeSnapshot();
+        this._AC_WRITE = false;
+
         this[content.F1.code]();
 
         this._lastMicroOperation = "F1";
@@ -209,7 +212,14 @@ export class CPU {
   }
 
   private DRTAR() {
-    this._AR = this._DR_SNAPSHOT.operand;
+    this._AR = this._DR_SNAPSHOT.isNumber
+      ? this._DR_SNAPSHOT.oppCode
+          .split("")
+          .reverse()
+          .slice(0, 11)
+          .reverse()
+          .join("")
+      : this._DR_SNAPSHOT.operand;
 
     this._signal.registerWrite("AR");
     this._signal.registerRead("DR");
